@@ -161,7 +161,7 @@ app.get('/ask', async (req, res) => {
     // Add the new question to the prompt
     prompt += `\nNew question:\nTell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}`;
 
-    // Generate career guidance based on the stored interests
+    // Generate career guidance based on the stored interests and previous chat history
     const response = await model.generateContent(prompt);
 
     let guidance = response.response.text();
@@ -176,18 +176,36 @@ app.get('/ask', async (req, res) => {
     res.status(500).send('Error fetching previous chat history');
   }
 });
-
 app.post('/ask', async (req, res) => {
   try {
     const { question } = req.body;
-    const result = await model.generateContent(question);
+
+    // Retrieve previous chat history of the current user from the database
+    const previousChat = await Chat.find({ username: userName }).sort({ _id: -1 }).limit(5);
+
+    // Create a prompt that includes the previous questions and answers
+    let prompt = '';
+    if (previousChat.length > 0) {
+      prompt += 'Previous chat history:\n';
+      previousChat.forEach(chat => {
+        prompt += `Question: ${chat.question}\nAnswer: ${chat.answer}\n\n`;
+      });
+    } else {
+      prompt += 'No previous chat history found.\n\n';
+    }
+
+    // Add the current question to the prompt
+    prompt += `New question:\n${question}`;
+
+    // Generate response based on the prompt
+    const result = await model.generateContent(prompt);
     const responseText = result.response.text(); // Get the text content from the response
     const cleanedResponseText = removeStars(responseText); // Remove stars from the text
 
-    // Save the question and answer to MongoDB
+    // Save the current question and generated response to MongoDB
     const chat = new Chat({
       username: userName,
-      question,
+      question: question,
       answer: responseText
     });
     await chat.save();
