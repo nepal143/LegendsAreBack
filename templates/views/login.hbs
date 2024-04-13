@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+{{!-- {{> header}} --}}
+<style>
+   /* Set the background color of the page */
+body {
+  background-color:#abd0ff ;
+}
+
+/* Style the form container */
+.container {
+  width: 25%;
+  padding:3rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 0 auto;
+  margin-top: 10%;
+  box-shadow: 0 2px 4px rgba(116, 137, 209, 0.1);
+}
+/* Style the form header */
+.container h1 {
+  text-align: center;
+  margin-bottom: 5%;
+}
+/* Style the form fields */
+.container .form-group {
+  margin-bottom:5%;
+}
+.container .form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom:2%;
+  margin-right: 5%;
+}
+.container .form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+/* Style the submit button */
+.btn {
+  width: 30%;
+  display: block;
+  margin: 0 auto;
+  padding: 8px;
+  background-color: #72ade2;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #4c7bd1;
+}
+</style>
+<body >
+<form action="/login" method="post"class="container" >
+<h1>Login</h1>
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" class="form-control" id="username" name="username" required>
+  </div>
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input type="email" class="form-control" id="email" name="email" required>
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" name="password" required>
+  </div>
+  <button type="submit" class="btn ">LOGIN</button>
+  <p style="text-align: center;">Don't have an account <a href="/register">create account</a></p>
+</form>
+</body>
+</html>
