@@ -68,7 +68,7 @@
         #command input
         {
             display:block;
-            width:73%;
+            width:7%;
             float:left;
 
         }
@@ -165,7 +165,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ question: `"Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest action plans: I am interested in ${interest1}, my hobby is ${interest2} and I am passionate about ${interest3}` })
+                body: JSON.stringify({ question: `Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest career action plans: Hobby and activity that i do in my free time is ${interest1}, I am passionate about ${interest2} and I like ${interest3}` })
             });
 
             const data = await response.json();

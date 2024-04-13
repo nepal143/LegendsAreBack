@@ -163,7 +163,7 @@ app.get('/ask', async (req, res) => {
     }
 
     // Add the new question to the prompt
-    prompt += `\nNew question:\nTell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}`;
+    prompt += `\nNew question: Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest career action plans: Hobby and activity that i do in my free time is ${interest1}, I am passionate about ${interest2} and I like ${interest3}`;
 
     // Generate career guidance based on the stored interests and previous chat history
     const response = await model.generateContent(prompt);
