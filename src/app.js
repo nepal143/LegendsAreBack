@@ -34,6 +34,7 @@ app.use(
     })
 );
 const ChatSchema = new mongoose.Schema({
+  username: String,
   question: String,
   answer: String
 });
@@ -58,6 +59,9 @@ app.get("/", (req, res) => {
 app.get("/register", (req, res) => {
   res.render("register");
 });
+app.get("/premium", (req, res) => {
+  res.render("premium");
+});
 
 app.get("/login", (req, res) => {
   res.render("login");
@@ -69,11 +73,6 @@ app.get("/dashboard", (req, res) => {
   res.render("dashboard", {userName});
 });
 
-
-app.get("/premium", (req, res) => {
-  res.render("premium");
-});
-
 // app.post("/dashboard", (req, res)=>{
 //   userName="Hello";
 // })
@@ -83,7 +82,7 @@ app.post('/handle-interest', async (req, res) => {
 
   try {
     // Create a new document and save it to MongoDB
-    const chat = new Chat({ question: interest1, answer: `${interest2}, ${interest3}` });
+    const chat = new Chat({ username: userName, question: interest1, answer: `${interest2}, ${interest3}` });
     await chat.save();
     res.status(200).send('Data saved successfully');
   } catch (error) {
@@ -147,7 +146,7 @@ app.get('/ask', async (req, res) => {
 
   try {
     // Retrieve previous chat history from the database
-    const previousChat = await Chat.find().sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
+    const previousChat = await Chat.find({ username: userName }).sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
 
     let prompt ="Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest action plans."
     prompt = prompt + " Previous chat history:\n";
@@ -165,8 +164,8 @@ app.get('/ask', async (req, res) => {
 
     // Add the new question to the prompt
     prompt += `\nNew question:\nTell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}`;
-    
-    // Generate career guidance based on the stored interests
+
+    // Generate career guidance based on the stored interests and previous chat history
     const response = await model.generateContent(prompt);
 
     let guidance = response.response.text();
@@ -181,17 +180,36 @@ app.get('/ask', async (req, res) => {
     res.status(500).send('Error fetching previous chat history');
   }
 });
-
 app.post('/ask', async (req, res) => {
   try {
     const { question } = req.body;
-    const result = await model.generateContent(question);
+
+    // Retrieve previous chat history of the current user from the database
+    const previousChat = await Chat.find({ username: userName }).sort({ _id: -1 }).limit(5);
+
+    // Create a prompt that includes the previous questions and answers
+    let prompt = '';
+    if (previousChat.length > 0) {
+      prompt += 'Previous chat history:\n';
+      previousChat.forEach(chat => {
+        prompt += `Question: ${chat.question}\nAnswer: ${chat.answer}\n\n`;
+      });
+    } else {
+      prompt += 'No previous chat history found.\n\n';
+    }
+
+    // Add the current question to the prompt
+    prompt += `New question:\n${question}`;
+
+    // Generate response based on the prompt
+    const result = await model.generateContent(prompt);
     const responseText = result.response.text(); // Get the text content from the response
     const cleanedResponseText = removeStars(responseText); // Remove stars from the text
 
-    // Save the question and answer to MongoDB
+    // Save the current question and generated response to MongoDB
     const chat = new Chat({
-      question,
+      username: userName,
+      question: question,
       answer: responseText
     });
     await chat.save();
@@ -210,7 +228,6 @@ app.post('/process-form', (req, res) => {
   // Redirect the user to the /ask route with the interests in the query parameters
   res.redirect(`/ask?interest1=${interest1}&interest2=${interest2}&interest3=${interest3}`);
 });
-
 // Database connection
 const uri = "mongodb+srv://nepalsss008:hacknova@cluster0.u2cqpgp.mongodb.net/";
 // Replace with your MongoDB Atlas URI
