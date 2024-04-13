@@ -7,9 +7,7 @@
     <title>Document</title>
     <link rel="stylesheet" href="dashboard.css">
 </head>
-<style>
 
-</style>
 <body>
     <div class="app-container">
         <div class="app-header">
@@ -36,21 +34,18 @@
                         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
                     </svg>
                 </button>
-              <div id="app">
-    <button id="addButton" class="add-btn" title="Add">+</button>
-    <div class="formouter ">
-    <div id="formContainer" class="form-container">
-        <form id="projectForm" class="form">
-            <!-- Your form fields go here -->
-            <input type="text" name="projectName" placeholder="Project Name">
-            <input type="text" name="projectDescription" placeholder="Project Description">
-            <button type="submit">Submit</button>
-        </form>
-    </div></div>
-    <div id="cardContainer"></div>
-</div>
-  
-                
+                <div id="app">
+                    <button id="addButton" class="add-btn" title="Add">+</button>
+                    <div class="formouter ">
+                        <div id="formContainer" class="form-container" style="display: none;">
+                            <form id="projectForm" class="form" action="/add-card" method="post">
+                                <input type="text" name="projectName" placeholder="Project Name">
+                                <input type="text" name="projectDescription" placeholder="Project Description">
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <button class="notification-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -73,247 +68,95 @@
                 </svg>
             </button>
         </div>
-    
+
         <div class="app-content">
-            
+
             <div class="projects-section">
                 <div class="projects-section-header">
                     <p>Bookmarks</p>
                     <p class="time"></p>
                 </div>
-                
+
                 <div class="project-boxes jsGridView">
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #fee4cb;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Career </p>
-                                <p class="box-content-subheader">Counselling</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 60%; background-color: #ff942e"></span>
-                                </div>
-                                <p class="box-progress-percentage">60%</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #e9e7fd;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Star </p>
-                                <p class="box-content-subheader">Queries</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Storage</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 50%; background-color: #4f3ff0"></span>
-                                </div>
-                                <p class="box-progress-percentage">50%</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="project-box-wrapper">
-                        <div class="project-box">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Svg Animations</p>
-                                <p class="box-content-subheader">Prototyping</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 80%; background-color: #096c86"></span>
-                                </div>
-                                <p class="box-progress-percentage">80%</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #ffd3e2;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">UI Development</p>
-                                <p class="box-content-subheader">Prototyping</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 20%; background-color: #df3670"></span>
-                                </div>
-                                <p class="box-progress-percentage">20%</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #c8f7dc;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Data Analysis</p>
-                                <p class="box-content-subheader">Prototyping</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 60%; background-color: #34c471"></span>
-                                </div>
-                                <p class="box-progress-percentage">60%</p>
-                            </div>
-                            
-                        </div>
-                    </div>
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #d5deff;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Web Designing</p>
-                                <p class="box-content-subheader">Prototyping</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 40%; background-color: #4067f9"></span>
-                                </div>
-                                <p class="box-progress-percentage">40%</p>
-                            </div>
-                           
-                        </div>
-                    </div>
-                </div>
+     
+
+
+                    {{#each projects}}
+<div class="project-box-wrapper">
+    <div class="project-box" style="background-color: #fee4cb;">
+        <div class="project-box-header">
+            <span>{{this.projectName}}</span>
+            <div class="more-wrapper">
+                <button class="project-btn-more">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-more-vertical">
+                        <circle cx="12" cy="12" r="1" />
+                        <circle cx="12" cy="5" r="1" />
+                        <circle cx="12" cy="19" r="1" />
+                    </svg>
+                </button>
             </div>
-            
+        </div>
+        <div class="project-box-content-header">
+            <p class="box-content-header">{{this.projectName}}</p>
+            <p class="box-content-subheader">{{this.projectDescription}}</p>
+        </div>
+    </div>
+</div>
+{{/each}}
+                    <!-- Other project-box-wrapper divs... -->
                 </div>
             </div>
         </div>
     </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-var modeSwitch = document.querySelector('.mode-switch');
-modeSwitch.addEventListener('click', function () { document.documentElement.classList.toggle('dark');
-modeSwitch.classList.toggle('active');
-});
 
-var addButton = document.getElementById('addButton');
-    var formContainer = document.getElementById('formContainer');
-    var formouter = document.getElementsByClassName('formouter')[0]; 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var modeSwitch = document.querySelector('.mode-switch');
+            modeSwitch.addEventListener('click', function () {
+                document.documentElement.classList.toggle('dark');
+                modeSwitch.classList.toggle('active');
+            });
 
-    // Add event listener for click event
-    addButton.addEventListener('click', function() {
-        // Toggle the visibility of the form
-        if (formContainer.style.display === 'none') {
-            formContainer.style.display = 'block';
-            formouter.classList.add("clicked");
-        } else {
-            formContainer.style.display = 'none';
-            formouter.classList.remove("clicked"); 
-        }
-    });
+            var addButton = document.getElementById('addButton');
+            var formContainer = document.getElementById('formContainer');
+            var formouter = document.getElementsByClassName('formouter')[0];
 
-    // Prevent the default form submission behavior
-    var projectForm = document.getElementById('projectForm');
-    projectForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        // Handle form submission here, e.g., submit data via AJAX
-        // Then, clear the form and hide it
-        projectForm.reset();
-        formContainer.style.display = 'none';
-        formouter.classList.remove("clicked"); 
-    });
+            // Add event listener for click event
+            addButton.addEventListener('click', function () {
+                // Toggle the visibility of the form
+                if (formContainer.style.display === 'none') {
+                    formContainer.style.display = 'block';
+                    formouter.classList.add("clicked");
+                } else {
+                    formContainer.style.display = 'none';
+                    formouter.classList.remove("clicked");
+                }
+            });
 
-
-
-});
-</script>
+            // Prevent the default form submission behavior
+            var projectForm = document.getElementById('projectForm');
+            projectForm.addEventListener('submit', async function (event) {
+                // Submit the form data via AJAX
+                try {
+                    const formData = new FormData(projectForm);
+                    if (response.ok) {
+                        console.log('Form submitted successfully');
+                        // Optionally, reset the form and hide it after successful submission
+                        projectForm.reset();
+                        formContainer.style.display = 'none';
+                        formouter.classList.remove("clicked");
+                    } else {
+                        console.error('Form submission failed:', response.statusText);
+                    }
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

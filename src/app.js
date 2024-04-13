@@ -3,6 +3,7 @@ const path = require("path");
 const hbs = require("hbs");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+
 const User = require("./models/User");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 let  interest1 ; 
@@ -16,7 +17,9 @@ const bcrypt = require('bcrypt');
 const api_key = "AIzaSyCSx1UbyW73TVEc_-XR9JGuKchXT69idBE"; // Replace with your API key
 const genAI = new GoogleGenerativeAI(api_key);
 const generationConfig = { temperature: 0.9, topP: 1, topK: 1, maxOutputTokens: 4096 };
-
+// ...
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json());
 // Get Generative Model
 const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
 
@@ -39,11 +42,19 @@ const ChatSchema = new mongoose.Schema({
   answer: String
 });
 
+const CardSchema = new mongoose.Schema({
+  username: String,
+  projectName: String,
+  projectDescription: String
+});
+
+// Define a model using the CardSchema
+const Card = mongoose.model('Card', CardSchema);
 function removeStars(inputString) {
   // Use the replace method with a regular expression to remove all "*" symbols
   cleanedString="";
   for(let i=0;i<inputString.length;i++){
-    if(inputString[i]>='0' && inputString[i]<='9'){
+    if(inputString[i]>='0' && inputString[i]<='9' && inputString[i+1]=='.'){
       cleanedString+="<br>";
     }
       cleanedString+=inputString[i];
@@ -85,8 +96,17 @@ app.get("/login", (req, res) => {
 app.get("/interest", (req, res) => {
   res.render("interest");
 });
-app.get("/dashboard", (req, res) => {
-  res.render("dashboard", {userName});
+app.get("/dashboard", async (req, res) => {
+  try {
+    // Fetch the user's projects from the database
+    const userProjects = await Card.find({ username: userName }); // Assuming Card is your Mongoose model for projects
+
+    // Render the dashboard template with the user's projects data
+    res.render("dashboard", { userName, projects: userProjects });
+  } catch (error) {
+    console.error("Error fetching user's projects:", error);
+    res.status(500).send("Error fetching user's projects");
+  }
 });
 
 // app.post("/dashboard", (req, res)=>{
@@ -272,6 +292,24 @@ async function connect() {
     console.error("Error connecting to MongoDB:", error);
   }
 }
+
+app.post("/add-card", async (req, res) => {
+  const { projectName, projectDescription } = req.body;
+  console.log("Received Project Name:", projectName);
+  console.log("Received Project Description:", projectDescription);
+  // console.log(req.body); 
+
+  try {
+      // Save card details using the Card model
+      const card = new Card({ username: userName, projectName, projectDescription });
+      await card.save();
+      console.log("Card saved successfully");
+      res.redirect("/dashboard"); // Redirect to dashboard or any other page
+  } catch (error) {
+      console.error('Error saving card:', error);
+      res.status(500).send('Error saving card');
+  }
+});
 
 connect();
 
