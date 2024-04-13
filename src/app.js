@@ -33,10 +33,9 @@ app.use(
       saveUninitialized: true,
     })
 );
-const InterestSchema = new mongoose.Schema({
-  interest1: String,
-  interest2: String,
-  interest3: String
+const ChatSchema = new mongoose.Schema({
+  question: String,
+  answer: String
 });
 
 function removeStars(inputString) {
@@ -46,7 +45,7 @@ function removeStars(inputString) {
 }
 
 // Define a model
-const Interest = mongoose.model('Interest', InterestSchema);
+const Chat = mongoose.model('Chat', ChatSchema);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
@@ -79,8 +78,8 @@ app.post('/handle-interest', async (req, res) => {
 
   try {
     // Create a new document and save it to MongoDB
-    const interest = new Interest({ interest1, interest2, interest3 });
-    await interest.save();
+    const chat = new Chat({ question: interest1, answer: `${interest2}, ${interest3}` });
+    await chat.save();
     res.status(200).send('Data saved successfully');
   } catch (error) {
     console.error('Error saving data:', error);
@@ -103,7 +102,7 @@ app.post("/register", async (req, res) => {
     res.redirect("/login");
   } catch (error) {
     console.error(error);
-    res.render("register", { error: "Registration failed" });l
+    res.render("register", { error: "Registration failed" });
   }
 });
 
@@ -132,6 +131,7 @@ app.post("/login", async (req, res) => {
     res.render("login", { error: "Login failed" });
   }
 });
+
 app.get('/ask', async (req, res) => {
   // Retrieve interests from the query parameters
   const { interest1, interest2, interest3 } = req.query;
@@ -142,14 +142,20 @@ app.get('/ask', async (req, res) => {
 
   try {
     // Retrieve previous chat history from the database
-    const previousChat = await Interest.find().sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
+    const previousChat = await Chat.find().sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
 
-    // Generate prompt including previous questions and answers
     let prompt = `Previous chat history:\n`;
-    previousChat.forEach((chat, index) => {
-      prompt += `${index + 1}. Question: ${chat.interest1}\n`;
-      prompt += `   Answer: ${chat.interest2}\n`;
-    });
+
+    if (previousChat.length > 0) {
+      // Generate prompt including previous questions and answers
+      previousChat.forEach((chat, index) => {
+        prompt += `${index + 1}. Question: ${chat.question}\n`;
+        prompt += `   Answer: ${chat.answer}\n`;
+      });
+    } else {
+      // If no previous chat history exists
+      prompt += `No previous chat history found.\n`;
+    }
 
     // Add the new question to the prompt
     prompt += `\nNew question:\nTell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}`;
@@ -177,6 +183,13 @@ app.post('/ask', async (req, res) => {
     const responseText = result.response.text(); // Get the text content from the response
     const cleanedResponseText = removeStars(responseText); // Remove stars from the text
 
+    // Save the question and answer to MongoDB
+    const chat = new Chat({
+      question,
+      answer: responseText
+    });
+    await chat.save();
+
     res.json({ response: cleanedResponseText });
   } catch (error) {
     console.error(error);
@@ -191,6 +204,7 @@ app.post('/process-form', (req, res) => {
   // Redirect the user to the /ask route with the interests in the query parameters
   res.redirect(`/ask?interest1=${interest1}&interest2=${interest2}&interest3=${interest3}`);
 });
+
 // Database connection
 const uri = "mongodb+srv://nepalsss008:hacknova@cluster0.u2cqpgp.mongodb.net/";
 // Replace with your MongoDB Atlas URI
