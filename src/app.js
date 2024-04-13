@@ -41,7 +41,17 @@ const ChatSchema = new mongoose.Schema({
 
 function removeStars(inputString) {
   // Use the replace method with a regular expression to remove all "*" symbols
-  const cleanedString = inputString.replace(/\*\*/g, '').replace(/\*/g, '<br>');
+  // cleanedString = inputString.replace(/\*\*/g, '').replace(/\*/g, '<br>');
+  cleanedString="";
+  for(let i=0;i<inputString.length;i++){
+    if(inputString[i]>='0' && inputString[i]<='9'){
+      cleanedString+="<br>";
+    }
+    
+      cleanedString+=inputString[i];
+    
+  }
+  cleanedString = cleanedString.replace(/\*\*/g, '').replace(/\*/g, '<br>');
   return cleanedString;
 }
 
