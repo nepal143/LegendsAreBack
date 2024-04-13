@@ -1,6 +1,6 @@
 # NEXTNICHE
 
-project for HackNova by Team **Equalizers**
+project for Nextniche by Team **Equalizers**
 <br>
 [project link]:()
 
