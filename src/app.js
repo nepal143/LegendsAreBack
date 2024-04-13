@@ -34,6 +34,7 @@ app.use(
     })
 );
 const ChatSchema = new mongoose.Schema({
+  username: String,
   question: String,
   answer: String
 });
@@ -69,11 +70,6 @@ app.get("/dashboard", (req, res) => {
   res.render("dashboard", {userName});
 });
 
-
-app.get("/premium", (req, res) => {
-  res.render("premium");
-});
-
 // app.post("/dashboard", (req, res)=>{
 //   userName="Hello";
 // })
@@ -83,7 +79,7 @@ app.post('/handle-interest', async (req, res) => {
 
   try {
     // Create a new document and save it to MongoDB
-    const chat = new Chat({ question: interest1, answer: `${interest2}, ${interest3}` });
+    const chat = new Chat({ username: userName, question: interest1, answer: `${interest2}, ${interest3}` });
     await chat.save();
     res.status(200).send('Data saved successfully');
   } catch (error) {
@@ -147,7 +143,7 @@ app.get('/ask', async (req, res) => {
 
   try {
     // Retrieve previous chat history from the database
-    const previousChat = await Chat.find().sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
+    const previousChat = await Chat.find({ username: userName }).sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
 
     let prompt = `Previous chat history:\n`;
 
@@ -190,6 +186,7 @@ app.post('/ask', async (req, res) => {
 
     // Save the question and answer to MongoDB
     const chat = new Chat({
+      username: userName,
       question,
       answer: responseText
     });
@@ -209,7 +206,6 @@ app.post('/process-form', (req, res) => {
   // Redirect the user to the /ask route with the interests in the query parameters
   res.redirect(`/ask?interest1=${interest1}&interest2=${interest2}&interest3=${interest3}`);
 });
-
 // Database connection
 const uri = "mongodb+srv://nepalsss008:hacknova@cluster0.u2cqpgp.mongodb.net/";
 // Replace with your MongoDB Atlas URI
