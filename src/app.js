@@ -237,6 +237,22 @@ app.post('/ask', async (req, res) => {
   }
 });
 
+let bookmarks=[]
+
+app.post('/api/bookmarks', async (req, res) => {
+  try {
+      const { answer } = req.body;
+      bookmarks.push({answer});
+      await bookmark.save();
+      res.status(201).json({ message: 'Bookmark added successfully' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 app.post('/process-form', (req, res) => {
   // Retrieve form data from the request body
   const { interest1, interest2, interest3 } = req.body;

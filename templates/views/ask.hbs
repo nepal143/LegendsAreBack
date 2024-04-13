@@ -179,7 +179,7 @@
 
             // Set the text content of the career guidance element
             careerGuidance.innerHTML = `
-                <div class="chat answer shadow"><button class="bookmarkBtn">Add to Bookmark</button>${data.response}</div>
+                <div class="chat answer shadow">${data.response}</div>
             `;
 
             console.log(data);
@@ -241,22 +241,40 @@
 });
         });
 
-        const chatItems = document.querySelectorAll('.answer');
-        chatItems.forEach(chatItem => {
-            chatItem.addEventListener('click', () => {
-                // Toggle display of bookmark button
-                const bookmarkBtn = chatItem.querySelector('.bookmarkBtn');
-                bookmarkBtn.style.display = 'block';
-            });
-
+        
             // Add event listener to bookmark button
-            const bookmarkBtn = chatItem.querySelector('.bookmarkBtn');
-            bookmarkBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // Prevent click event from bubbling to chatItem
-                // Add functionality to add chat to bookmarks
-                
+            const bookmarkBtns = chatElement.querySelectorAll('.bookmarkBtn');
+bookmarkBtns.forEach(bookmarkBtn => {
+    bookmarkBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Find the closest "answer" element relative to the clicked button
+        const answerElement = event.target.closest('.answer');
+
+        const answer = answerElement.textContent;
+
+        // Send message content to the server to be saved as a bookmark
+        try {
+            const response = await fetch('/api/bookmarks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ answer })
             });
-        });
+            if (response.ok) {
+                alert('Message added to bookmarks successfully');
+            } else {
+                alert('Failed to add message to bookmarks');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to add message to bookmarks');
+        }
+    });
+});
+
     </script>
 </body>
 </html>
