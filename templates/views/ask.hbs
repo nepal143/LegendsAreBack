@@ -20,6 +20,7 @@
             background-color:#4ec2ae;
 
         }
+
         #h{
             Color:#fff;
             Border-radius:5px;
@@ -38,8 +39,7 @@
             font-family:'Josefin Sans',sans-serif;
         }
 
-        header
-        {
+        header{
             text-align:center;
         }
 
@@ -143,6 +143,7 @@
 
     <main class="nice-font">
         <div class="row" id="careerGuidance">
+            
             <!-- Career guidance will be displayed here -->
         </div>
     </main>
@@ -178,7 +179,7 @@
 
             // Set the text content of the career guidance element
             careerGuidance.innerHTML = `
-                <div class="chat answer shadow">${data.response}</div>
+                <div class="chat answer shadow"><button class="bookmarkBtn">Add to Bookmark</button>${data.response}</div>
             `;
 
             console.log(data);
@@ -238,6 +239,23 @@
         }
     }
 });
+        });
+
+        const chatItems = document.querySelectorAll('.answer');
+        chatItems.forEach(chatItem => {
+            chatItem.addEventListener('click', () => {
+                // Toggle display of bookmark button
+                const bookmarkBtn = chatItem.querySelector('.bookmarkBtn');
+                bookmarkBtn.style.display = 'block';
+            });
+
+            // Add event listener to bookmark button
+            const bookmarkBtn = chatItem.querySelector('.bookmarkBtn');
+            bookmarkBtn.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent click event from bubbling to chatItem
+                // Add functionality to add chat to bookmarks
+                
+            });
         });
     </script>
 </body>
