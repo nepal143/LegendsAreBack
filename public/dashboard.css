@@ -789,3 +789,21 @@ right: 2px;
 top: 10px;
 }
 }
+
+
+.premium{
+     background-color: #007bff;
+     color: #fff;
+     border: none;
+     border-radius: 5px;
+     padding: 10px 15px;
+     font-size: 16px;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     text-decoration: none;
+ }
+ 
+.premium:hover {
+     background-color: #0056b3;
+     color: #fff; /* Change text color on hover */
+ }

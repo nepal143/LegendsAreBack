@@ -70,6 +70,11 @@ app.get("/dashboard", (req, res) => {
   res.render("dashboard", {userName});
 });
 
+
+app.get("/premium", (req, res) => {
+  res.render("premium");
+});
+
 // app.post("/dashboard", (req, res)=>{
 //   userName="Hello";
 // })
