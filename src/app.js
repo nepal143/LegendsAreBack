@@ -52,7 +52,23 @@ const CardSchema = new mongoose.Schema({
 const Card = mongoose.model('Card', CardSchema);
 function removeStars(inputString) {
   // Use the replace method with a regular expression to remove all "*" symbols
-  const cleanedString = inputString.replace(/\*\*/g, '').replace(/\*/g, '<br>');
+  cleanedString="";
+  for(let i=0;i<inputString.length;i++){
+    if(inputString[i]>='0' && inputString[i]<='9'){
+      cleanedString+="<br>";
+    }
+      cleanedString+=inputString[i];
+    
+  }
+  substr="Career Action Plan"
+  if(inputString.includes(substr)){
+  let a=inputString.indexOf(substr);
+   str1=cleanedString.substring(0,a);
+   str2=cleanedString.substring(a+18);
+   cleanedString=str1+"<br>"+"<b>"+"Career Action Plan"+"</b>"+str2;
+
+  }
+  cleanedString = cleanedString.replace(/\*\*/g, '').replace(/\*/g, '<br>');
   return cleanedString;
 }
 
