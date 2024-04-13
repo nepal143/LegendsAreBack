@@ -53,7 +53,7 @@
         {
             position:fixed;
             bottom:0;
-            width:100%;
+            width:50%;
             padding:7px 7px;
             padding-right:7px;
             margin-bottom:5px;
@@ -62,13 +62,13 @@
             -ms-box-sizing:border-box;
             box-sizing:border-box ;
             background-color:#fff;
-
+            left: 25%;
         }
 
         #command input
         {
             display:block;
-            width:7%;
+            width:73%;
             float:left;
 
         }
@@ -107,13 +107,13 @@
         .chat
         {
             border:0;
-            word-wrap:break-word;
             background-color:#fff;
-            border-radius:30px;
+            border-radius:20px;
             color:#111;
             padding:10px 20px;
-            display:inline-block  ; 
+            display:block  ; 
             margin: 10px ; 
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
         }
 
         .question
@@ -201,7 +201,9 @@
     if (question) {
         // Clear input field
         questionInput.value = "";
-
+        const chatElement = document.createElement('div');
+        chatElement.classList.add('row');
+                    
         try {
             // Send the question to the server
             const response = await fetch('/ask', {
@@ -216,8 +218,8 @@
             if (response.ok) {
                 const data = await response.json();
                 // Display the response in the chat
-                const chatElement = document.createElement('div');
-                chatElement.classList.add('row');
+                
+                
                 chatElement.innerHTML = `
                     <div class="chat question shadow">${question}</div>
                     <div class="chat answer shadow">${data.response}</div>
