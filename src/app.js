@@ -54,7 +54,7 @@ function removeStars(inputString) {
   // Use the replace method with a regular expression to remove all "*" symbols
   cleanedString="";
   for(let i=0;i<inputString.length;i++){
-    if(inputString[i]>='0' && inputString[i]<='9'){
+    if(inputString[i]>='0' && inputString[i]<='9' && inputString[i+1]=='.'){
       cleanedString+="<br>";
     }
       cleanedString+=inputString[i];
