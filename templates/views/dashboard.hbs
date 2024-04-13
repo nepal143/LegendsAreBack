@@ -27,6 +27,9 @@
                     </svg>
                 </div>
             </div>
+            <button class="premium-btn" title="Premium">
+    Premium
+</button>
             <div class="app-header-right">
                 <a class="premium" href="/premium">Access Premium</a>
                 <button class="mode-switch" title="Switch Theme">
@@ -36,14 +39,21 @@
                         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
                     </svg>
                 </button>
-                <button class="add-btn" title="Add New Project">
-                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
-                        stroke-linejoin="round" class="feather feather-plus">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                </button>
+              <div id="app">
+    <button id="addButton" class="add-btn" title="Add">+</button>
+    <div class="formouter ">
+    <div id="formContainer" class="form-container">
+        <form id="projectForm" class="form">
+            <!-- Your form fields go here -->
+            <input type="text" name="projectName" placeholder="Project Name">
+            <input type="text" name="projectDescription" placeholder="Project Description">
+            <button type="submit">Submit</button>
+        </form>
+    </div></div>
+    <div id="cardContainer"></div>
+</div>
+  
+                
                 <button class="notification-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -66,6 +76,7 @@
                 </svg>
             </button>
         </div>
+    
         <div class="app-content">
             
             <div class="projects-section">
@@ -274,21 +285,34 @@ var modeSwitch = document.querySelector('.mode-switch');
 modeSwitch.addEventListener('click', function () { document.documentElement.classList.toggle('dark');
 modeSwitch.classList.toggle('active');
 });
-var listView = document.querySelector('.list-view');
-var gridView = document.querySelector('.grid-view');
-var projectsList = document.querySelector('.project-boxes');
-listView.addEventListener('click', function () {
-gridView.classList.remove('active');
-listView.classList.add('active');
-projectsList.classList.remove('jsGridView');
-projectsList.classList.add('jsListView');
-});
-gridView.addEventListener('click', function () {
-gridView.classList.add('active');
-listView.classList.remove('active');
-projectsList.classList.remove('jsListView');
-projectsList.classList.add('jsGridView');
-});
+
+var addButton = document.getElementById('addButton');
+    var formContainer = document.getElementById('formContainer');
+    var formouter = document.getElementsByClassName('formouter')[0]; 
+
+    // Add event listener for click event
+    addButton.addEventListener('click', function() {
+        // Toggle the visibility of the form
+        if (formContainer.style.display === 'none') {
+            formContainer.style.display = 'block';
+            formouter.classList.add("clicked");
+        } else {
+            formContainer.style.display = 'none';
+            formouter.classList.remove("clicked"); 
+        }
+    });
+
+    // Prevent the default form submission behavior
+    var projectForm = document.getElementById('projectForm');
+    projectForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        // Handle form submission here, e.g., submit data via AJAX
+        // Then, clear the form and hide it
+        projectForm.reset();
+        formContainer.style.display = 'none';
+        formouter.classList.remove("clicked"); 
+    });
+
 
 
 });

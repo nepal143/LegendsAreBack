@@ -807,3 +807,63 @@ top: 10px;
      background-color: #0056b3;
      color: #fff; /* Change text color on hover */
  }
+
+.add-btn {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.add-btn:hover {
+    background-color: #0056b3;
+}
+.form-container {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 150px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+.clicked{
+    width: 100vw ;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.379);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Styles for the form */   
+.form {
+    text-align: center;
+}
+
+.form input[type="text"],
+.form button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 80%;
+    font-size: 16px;
+}
+
+.form button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.form button:hover {
+    background-color: #0056b3;
+}
