@@ -78,37 +78,34 @@
                 </div>
 
                 <div class="project-boxes jsGridView">
-                    <div class="project-box-wrapper">
-                        <div class="project-box" style="background-color: #fee4cb;">
-                            <div class="project-box-header">
-                                <span></span>
-                                <div class="more-wrapper">
-                                    <button class="project-btn-more">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                            stroke-linecap="round" stroke-linejoin="round"
-                                            class="feather feather-more-vertical">
-                                            <circle cx="12" cy="12" r="1" />
-                                            <circle cx="12" cy="5" r="1" />
-                                            <circle cx="12" cy="19" r="1" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="project-box-content-header">
-                                <p class="box-content-header">Career </p>
-                                <p class="box-content-subheader">Counselling</p>
-                            </div>
-                            <div class="box-progress-wrapper">
-                                <p class="box-progress-header">Progress</p>
-                                <div class="box-progress-bar">
-                                    <span class="box-progress" style="width: 60%; background-color: #ff942e"></span>
-                                </div>
-                                <p class="box-progress-percentage">60%</p>
-                            </div>
+     
 
-                        </div>
-                    </div>
+
+                    {{#each projects}}
+<div class="project-box-wrapper">
+    <div class="project-box" style="background-color: #fee4cb;">
+        <div class="project-box-header">
+            <span>{{this.projectName}}</span>
+            <div class="more-wrapper">
+                <button class="project-btn-more">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-more-vertical">
+                        <circle cx="12" cy="12" r="1" />
+                        <circle cx="12" cy="5" r="1" />
+                        <circle cx="12" cy="19" r="1" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="project-box-content-header">
+            <p class="box-content-header">{{this.projectName}}</p>
+            <p class="box-content-subheader">{{this.projectDescription}}</p>
+        </div>
+    </div>
+</div>
+{{/each}}
                     <!-- Other project-box-wrapper divs... -->
                 </div>
             </div>
@@ -145,10 +142,6 @@
                 // Submit the form data via AJAX
                 try {
                     const formData = new FormData(projectForm);
-                    const response = await fetch('/add-card', {
-                        method: 'POST',
-                        body: formData
-                    });
                     if (response.ok) {
                         console.log('Form submitted successfully');
                         // Optionally, reset the form and hide it after successful submission

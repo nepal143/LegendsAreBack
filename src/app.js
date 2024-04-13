@@ -96,8 +96,17 @@ app.get("/login", (req, res) => {
 app.get("/interest", (req, res) => {
   res.render("interest");
 });
-app.get("/dashboard", (req, res) => {
-  res.render("dashboard", {userName});
+app.get("/dashboard", async (req, res) => {
+  try {
+    // Fetch the user's projects from the database
+    const userProjects = await Card.find({ username: userName }); // Assuming Card is your Mongoose model for projects
+
+    // Render the dashboard template with the user's projects data
+    res.render("dashboard", { userName, projects: userProjects });
+  } catch (error) {
+    console.error("Error fetching user's projects:", error);
+    res.status(500).send("Error fetching user's projects");
+  }
 });
 
 // app.post("/dashboard", (req, res)=>{
