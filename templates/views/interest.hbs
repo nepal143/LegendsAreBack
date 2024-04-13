@@ -111,20 +111,69 @@ input[type="submit"]:hover {
             <h1>Interest Assessment</h1>
             <form id="interestForm" action="/handle-interest" method="POST" onsubmit="parseInterests(event)">
                 <div id="question1" class="question">
-                    <label for="interest1">Question 1: What hobbies or activities do you enjoy in your free time?</label><br>
+                    <label for="interest1">Question 1: what is the favourite class that student is attending
+
+</label><br>
                     <input type="text" id="interest1" name="interest1"><br><br>
                     <button type="button" onclick="nextQuestion()">Next</button>
                 </div>
 
                 <div id="question2" class="question" style="display: none;">
-                    <label for="interest2">Question 2: Are there any specific subjects or topics that you're passionate about?</label><br>
+                    <label for="interest2">Question 2:which subject he excels at?
+</label><br>
                     <input type="text" id="interest2" name="interest2"><br><br>
                     <button type="button" onclick="nextQuestion()">Next</button>
                 </div>
-
                 <div id="question3" class="question" style="display: none;">
-                    <label for="interest3">Question 3: Have you ever pursued any creative endeavors, like writing, painting, or music?</label><br>
+                    <label for="interest3">Question 3:What hobbies or activities do you enjoy in your free time?
+
+</label><br>
                     <input type="text" id="interest3" name="interest3"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+                </div>
+
+                <div id="question4" class="question" style="display: none;">
+                    <label for="interest4">Question 4:Are there any specific subjects or topics that you're passionate about?
+
+
+</label><br>
+                    <input type="text" id="interest4" name="interest4"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+                </div>
+                
+                <div id="question5" class="question" style="display: none;">
+                    <label for="interest5">Question 5:ave you ever pursued any creative endeavors, like writing, painting, or music?
+
+</label><br>
+                    <input type="text" id="interest5" name="interest5"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+                </div>
+                
+
+                <div id="question6" class="question" style="display: none;">
+                    <label for="interest5">Question 6:income and financial preference?
+
+</label><br>
+                    <input type="text" id="interest6" name="interest6"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+
+                </div>
+
+                <div id="question7" class="question" style="display: none;">
+                    <label for="interest2">Question 7: how does he study ? does he preffer a structured enviroment or more like a loose enviroment?
+</label><br>
+                    <input type="text" id="interest7" name="interest7"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+                </div>
+                <div id="question8" class="question" style="display: none;">
+                    <label for="interest8">Question 8: about his personality</label><br>
+                    <input type="text" id="interest8" name="interest8"><br><br>
+                    <button type="button" onclick="nextQuestion()">Next</button>
+                </div>
+
+                <div id="question9" class="question" style="display: none;">
+                    <label for="interest9">Question 9: about your social skill?</label><br>
+                    <input type="text" id="interest9" name="interest9"><br><br>
                     <input type="submit" value="Submit">
                 </div>
             </form>
@@ -159,8 +208,15 @@ input[type="submit"]:hover {
             const interest1 = formData.get('interest1');
             const interest2 = formData.get('interest2');
             const interest3 = formData.get('interest3');
+            const interest4 = formData.get('interest4');
+            const interest5 = formData.get('interest5');
+            const interest6 = formData.get('interest6');
+            const interest7 = formData.get('interest7');
+            const interest8 = formData.get('interest8');
+            const interest9 = formData.get('interest9');
+
             // Redirect to the same page with URL parameters
-            window.location.href = `/ask?interest1=${interest1}&interest2=${interest2}&interest3=${interest3}`;
+            window.location.href = `/ask?interest1=${interest1}&interest2=${interest2}&interest3=${interest3}&interest3=${interest3}&interest4=${interest4}&interest5=${interest5}&interest6=${interest6}&interest7=${interest7}&interest8=${interest8}&interest9=${interest9}`;
         }
     </script>
 </body>
