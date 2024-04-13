@@ -165,7 +165,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ question: `Tell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}` })
+                body: JSON.stringify({ question: `"Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest action plans: I am interested in ${interest1}, my hobby is ${interest2} and I am passionate about ${interest3}` })
             });
 
             const data = await response.json();

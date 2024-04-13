@@ -149,8 +149,9 @@ app.get('/ask', async (req, res) => {
     // Retrieve previous chat history from the database
     const previousChat = await Chat.find().sort({ _id: -1 }).limit(5); // Assuming you want to retrieve the last 5 chats
 
-    let prompt = `Previous chat history:\n`;
-
+    let prompt ="Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest action plans."
+    prompt = prompt + " Previous chat history:\n";
+    console.log(prompt);
     if (previousChat.length > 0) {
       // Generate prompt including previous questions and answers
       previousChat.forEach((chat, index) => {
@@ -164,7 +165,7 @@ app.get('/ask', async (req, res) => {
 
     // Add the new question to the prompt
     prompt += `\nNew question:\nTell me about ${interest1}, What skills are important for ${interest2}, What are the opportunities in ${interest3}`;
-
+    
     // Generate career guidance based on the stored interests
     const response = await model.generateContent(prompt);
 
