@@ -2,7 +2,7 @@
 
 project for Nextniche by Team **Equalizers**
 <br>
-[project link]:()
+[project link]:(https://legendsareback.onrender.com)
 
 ## Problem Statements
 
@@ -29,7 +29,7 @@ Career path guidance by using AI</br>
 
 ## Requirements
 
-A smart phone
+A smart phone or a PC
 
 ## Technology Stack
 
