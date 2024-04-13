@@ -47,8 +47,8 @@ nav {
 }
 
 #social-media i {
-    color:#23dcbb;
-    border: .3rem solid #23dcbb;
+    color:#018971;
+    border: .3rem solid #018971;
     padding: .5rem;
     border-radius: 6rem;
     list-style-type: none;
@@ -67,7 +67,7 @@ h1 {
 }
 
 h1 span {
-    color: #23dcbb;
+    color: #018971;
     font-size: 9rem;
 }
 
@@ -88,9 +88,9 @@ h2 {
 }
 
 button {
-    background-color: #23dcbb;
+    background-color: #01a184df;
     padding: 1rem 3rem;
-    border: .1rem solid #23dcbb;
+    border: .1rem solid #018971;
     border-radius: 4rem;
     font-family: 'Poppins', sans-serif;
     font-size: 2rem;
