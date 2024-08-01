@@ -1,280 +1,246 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title></title>
-    <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Guidance Chat</title>
     <link href="https://fonts.googleapis.com/css?family=Josefin+Sans" rel="stylesheet">
-
     <style>
-
-        html,body 
-        {
-            padding:0;
-            margin:0;
-            max-width:100%;
-            user-select:none;
-            -ms-user-select:none;
-            -moz-user-select:none;
-            -webkit-user-select:none;
-            background-color:#4ec2ae;
-
+        html,
+        body {
+            padding: 0;
+            margin: 0;
+            max-width: 100%;
+            user-select: none;
+            background-color: #f0f2f5;
+            font-family: 'Josefin Sans', sans-serif;
         }
 
-        #h{
-            Color:#fff;
-            Border-radius:5px;
+        header {
+            background-color: #1e88e5;
+            color: #fff;
+            padding: 10px 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
         }
 
-        .shadow{
-
-            -webkit-box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 7px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -1px rgba(0, 0, 0, 0.2);
-
-            box-shadow: 0 3px 3px 0 rgba(0, 0, 0, 0.14), 0 1px 7px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -1px rgba(0, 0, 0, 0.2); 
-
+        main {
+            width: 80%;
+            margin: auto;
+            padding: 10px;
+            height: calc(100vh - 120px);
+            overflow-y: auto;
         }
 
-        .nice-font
-        {
-            font-family:'Josefin Sans',sans-serif;
+        footer {
+            background-color: #fff;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        header{
-            text-align:center;
+        #command {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
         }
 
-        main
-        {
-            padding:10px;
-            margin-bottom:50px;
+        #questionInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
         }
 
-        footer #command
-        {
-            position:fixed;
-            bottom:0;
-            width:50%;
-            padding:7px 7px;
-            padding-right:7px;
-            margin-bottom:5px;
-            border-radius:30px;
-            border:0.5px solid #9e9e9e50;
-            -ms-box-sizing:border-box;
-            box-sizing:border-box ;
-            background-color:#fff;
-            left: 25%;
-        }
-
-        #command input
-        {
-            display:block;
-            width:73%;
-            float:left;
-
-        }
-
-        #command input,#command button
-        {
-
-            padding:10px 15px;
-            border:0;
-            outline:0;
-        }
-
-
-        button
-        {
-            background-color:#1e88e5;
-            color:#fff;
-            border-radius:20px;
-            font-weight:300;
-            float:right;
-        }
-
-        .row
-        {
-            width:100%;
-            margin-bottom:10px;
-            display:block;
-        }
-
-        .row::after{
-            content: "";
-            display: table;
-            clear: both;
-        }
-
-        .chat
-        {
-            border:0;
-            background-color:#fff;
-            border-radius:20px;
-            color:#111;
-            padding:10px 20px;
-            display:block  ; 
-            margin: 10px ; 
-            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-        }
-
-        .question
-        {
-            float:right;
-            background-color:#1e88e5;
-            color:#fff;
-        }
-
-        .answer
-        {
-            float:left;
-        }
-        .pointer{ 
-            curson: pointer; 
-
-        }
-        button{
+        button {
+            background-color: #1e88e5;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
             cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 70%;
+            width: fit-content;
+            word-wrap: break-word;
+            white-space: pre-wrap; /* Preserve whitespace */
+        }
+
+        .message.user {
+            background-color: #1e88e5;
+            color: #fff;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.ai {
+            background-color: #fff;
+            color: #000;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+
+        .typing-indicator {
+            display: inline-block;
+            width: 0;
+            height: 1em;
+            overflow: hidden;
+            white-space: nowrap;
+            vertical-align: bottom;
+            animation: typing 1.5s steps(30, end) forwards;
+        }
+
+        @keyframes typing {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
         }
     </style>
 </head>
+
 <body>
     <header>
-        <h1 class="nice-font" id="h" >Voyager {{{data}}}</h1>
+        Career Guidance Chat
     </header>
 
-    <main class="nice-font">
-        <div class="row" id="careerGuidance">
-            
-            <!-- Career guidance will be displayed here -->
+    <main id="chatContainer">
+        {{#if response}}
+        <div class="message ai">
+            <div class="typing-indicator"></div>
+            <div class="response-content">{{response}}</div>
         </div>
+        {{/if}}
     </main>
-
-    <div id="last"></div>
 
     <footer>
         <div id="command">
-            <input id="questionInput" placeholder="Ask your query here" type="text" />
-            <button id="askButton" class="shadow nice-font pointer">∆</button>
+            <input id="questionInput" placeholder="Type your question here..." type="text" />
+            <button id="askButton">Send</button>
         </div>
     </footer>
 
     <script>
-        const element = selector => document.querySelector(selector);
-
-        const generateCareerGuidance = async (interest1, interest2, interest3) => {
-            const response = await fetch('/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question: `Hello Gemini, You will suggest career and give guidance to the student based on the certain question that are asked to the user and are given below. Please only give help related to the career and suggest career action plans: Hobby and activity that i do in my free time is ${interest1},<br>
-                 I am passionate about ${interest2} <br>
-                 
-                 and I like ${interest3}` })
-            });
-
-            const data = await response.json();
-
-            // Get the career guidance element
-            const careerGuidance = element("#careerGuidance");
-
-            // Set the text content of the career guidance element
-            careerGuidance.innerHTML = `
-                <div class="chat answer shadow">${data.response}</div>
-            `;
-
-            console.log(data);
-            window.scrollTo(0, document.body.scrollHeight);
-        };
-
         document.addEventListener("DOMContentLoaded", () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const interest1 = urlParams.get('interest1');
-            const interest2 = urlParams.get('interest2');
-            const interest3 = urlParams.get('interest3');
+            const chatContainer = document.querySelector("#chatContainer");
+            const questionInput = document.querySelector("#questionInput");
+            const askButton = document.querySelector("#askButton");
 
-            if (interest1 && interest2 && interest3) {
-                generateCareerGuidance(interest1, interest2, interest3);
-            }
-            
-            // Add event listener to the ask button
-            const askButton = element("#askButton");
-            const questionInput = element("#questionInput");
-            
-          askButton.addEventListener("click", async () => {
-    const question = questionInput.value.trim();
-    if (question) {
-        // Clear input field
-        questionInput.value = "";
-        const chatElement = document.createElement('div');
-        chatElement.classList.add('row');
-                    
-        try {
-            // Send the question to the server
-            const response = await fetch('/ask', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ question })
+            // Function to beautify text (optional: you can implement more complex beautification here)
+            const beautifyText = (text) => {
+                // Example: Replace multiple spaces with a single space
+                return text.replace(/\s+/g, ' ').trim();
+            };
+
+            // Function to add a message to the chat
+            const addMessage = (text, isUser = true, isTyping = false) => {
+                const messageDiv = document.createElement("div");
+                messageDiv.classList.add("message", isUser ? "user" : "ai");
+
+                if (isTyping) {
+                    messageDiv.innerHTML = '<span class="typing-indicator"></span>';
+                } else {
+                    messageDiv.innerHTML = beautifyText(text); // Apply beautification
+                }
+
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                return messageDiv;
+            };
+
+            // Function to simulate typing effect
+            const simulateTyping = (messageDiv, text) => {
+                let index = 0;
+                messageDiv.innerHTML = ''; // Clear previous content
+                const typingInterval = setInterval(() => {
+                    if (index < text.length) {
+                        messageDiv.innerHTML = beautifyText(text.substring(0, index + 1)) + '<span class="typing-indicator"></span>';
+                        index++;
+                    } else {
+                        clearInterval(typingInterval);
+                    }
+                }, 20); // Adjust typing speed here (lower is faster)
+            };
+
+            // Handle click event on the Send button
+            askButton.addEventListener("click", async () => {
+                const question = questionInput.value.trim();
+                if (question) {
+                    questionInput.value = ""; // Clear input field
+                    addMessage(question, true); // Add user's message
+                    const loadingMessage = addMessage("Loading...", false); // Add loading message
+                    askButton.disabled = true; // Disable button to prevent multiple clicks
+
+                    try {
+                        console.log('Sending question to server:', question);
+                        const response = await fetch(`/ask?interest1=${encodeURIComponent(question)}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        console.log('Server response status:', response.status);
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('Received data:', data.response);
+                            loadingMessage.remove(); // Remove loading message
+
+                            // Add AI's response with typing effect
+                            const messageDiv = addMessage("", false, true);
+                            simulateTyping(messageDiv, beautifyText(data.response));
+                        } else {
+                            console.error('Server response not OK:', response.status);
+                            loadingMessage.innerText = "Error retrieving response."; // Update loading message
+                        }
+                    } catch (error) {
+                        console.error('Error sending question to server:', error);
+                        loadingMessage.innerText = "An error occurred."; // Update loading message
+                    } finally {
+                        askButton.disabled = false; // Re-enable button after processing
+                    }
+                }
             });
 
-            // Handle the response
-            if (response.ok) {
-                const data = await response.json();
-                // Display the response in the chat
-                
-                
-                chatElement.innerHTML = `
-                    <div class="chat question shadow">${question}</div>
-                    <div class="chat answer shadow">${data.response}</div>
-                `;
-                careerGuidance.appendChild(chatElement);
-                // Scroll to the bottom of the chat
-                window.scrollTo(0, document.body.scrollHeight);
-            } else {
-                console.error('Server response not OK:', response.status);
-            }
-        } catch (error) {
-            console.error('Error sending question to server:', error);
-        }
-    }
-});
+            // Handle Enter key press to send message
+            questionInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    askButton.click();
+                }
+            });
         });
-
-        
-            // Add event listener to bookmark button
-            const bookmarkBtns = chatElement.querySelectorAll('.bookmarkBtn');
-bookmarkBtns.forEach(bookmarkBtn => {
-    bookmarkBtn.addEventListener('click', async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        // Find the closest "answer" element relative to the clicked button
-        const answerElement = event.target.closest('.answer');
-
-        const answer = answerElement.textContent;
-
-        // Send message content to the server to be saved as a bookmark
-        try {
-            const response = await fetch('/api/bookmarks', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ answer })
-            });
-            if (response.ok) {
-                alert('Message added to bookmarks successfully');
-            } else {
-                alert('Failed to add message to bookmarks');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Failed to add message to bookmarks');
-        }
-    });
-});
-
     </script>
+
 </body>
+
 </html>
+ 
