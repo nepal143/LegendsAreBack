@@ -59,6 +59,7 @@
             border-radius: 20px;
             margin-right: 10px;
             font-size: 16px;
+            width: fit-content;
         }
 
         button {
@@ -119,7 +120,6 @@
             from {
                 width: 0;
             }
-
             to {
                 width: 100%;
             }
@@ -133,12 +133,7 @@
     </header>
 
     <main id="chatContainer">
-        {{#if response}}
-        <div class="message ai">
-            <div class="typing-indicator"></div>
-            <div class="response-content">{{response}}</div>
-        </div>
-        {{/if}}
+        <!-- Messages will be displayed here -->
     </main>
 
     <footer>
@@ -154,12 +149,6 @@
             const questionInput = document.querySelector("#questionInput");
             const askButton = document.querySelector("#askButton");
 
-            // Function to beautify text (optional: you can implement more complex beautification here)
-            const beautifyText = (text) => {
-                // Example: Replace multiple spaces with a single space
-                return text.replace(/\s+/g, ' ').trim();
-            };
-
             // Function to add a message to the chat
             const addMessage = (text, isUser = true, isTyping = false) => {
                 const messageDiv = document.createElement("div");
@@ -168,7 +157,7 @@
                 if (isTyping) {
                     messageDiv.innerHTML = '<span class="typing-indicator"></span>';
                 } else {
-                    messageDiv.innerHTML = beautifyText(text); // Apply beautification
+                    messageDiv.innerHTML = text;
                 }
 
                 chatContainer.appendChild(messageDiv);
@@ -182,12 +171,12 @@
                 messageDiv.innerHTML = ''; // Clear previous content
                 const typingInterval = setInterval(() => {
                     if (index < text.length) {
-                        messageDiv.innerHTML = beautifyText(text.substring(0, index + 1)) + '<span class="typing-indicator"></span>';
+                        messageDiv.innerHTML = text.substring(0, index + 1) + '<span class="typing-indicator"></span>';
                         index++;
                     } else {
                         clearInterval(typingInterval);
                     }
-                }, 20); // Adjust typing speed here (lower is faster)
+                }, 10); // Adjust typing speed here (lower is faster)
             };
 
             // Handle click event on the Send button
@@ -201,11 +190,12 @@
 
                     try {
                         console.log('Sending question to server:', question);
-                        const response = await fetch(`/ask?interest1=${encodeURIComponent(question)}`, {
-                            method: 'GET',
+                        const response = await fetch('/ask', {
+                            method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
-                            }
+                            },
+                            body: JSON.stringify({ question })   
                         });
 
                         console.log('Server response status:', response.status);
@@ -216,7 +206,7 @@
 
                             // Add AI's response with typing effect
                             const messageDiv = addMessage("", false, true);
-                            simulateTyping(messageDiv, beautifyText(data.response));
+                            simulateTyping(messageDiv, data.response);
                         } else {
                             console.error('Server response not OK:', response.status);
                             loadingMessage.innerText = "Error retrieving response."; // Update loading message
@@ -243,4 +233,4 @@
 </body>
 
 </html>
- 
+    
