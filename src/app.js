@@ -13,7 +13,7 @@ app.set("views", path.join(__dirname, "/../templates/views"));
 hbs.registerPartials(path.join(__dirname, "/../templates/views/partials"));
 app.use(express.static(path.join(__dirname, "/../public")));
 
-// Middleware to parse JSON
+// Middleware to parse JSON and URL-encoded data
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -21,6 +21,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const api_key = process.env.GOOGLE_GENERATIVE_AI_KEY;
 const genAI = new GoogleGenerativeAI(api_key);
 const generationConfig = { temperature: 0.9, topP: 1, topK: 1, maxOutputTokens: 4096 };
+
+// Temporary in-memory storage (for demonstration, use session or database in production)
+let generatedQuestionsWithAnswers = [];
 
 // Route to render the question generation form
 app.get("/generate-questions", (req, res) => {
@@ -31,36 +34,41 @@ app.post("/generate-questions", async (req, res) => {
   const { field } = req.body;
 
   try {
-    const prompt = `Generate a set of 10 objective-type questions related to ${field}. 
-    Each question should have 4 options and should be formatted as JSON:
+    const prompt = `Generate a set of 10 objective-type questions related to ${field}, along with the correct answers. 
+    Each question should have 4 options and the correct answer should be indicated. Format the response as JSON:
     [
       {
         "question": "<Question text>",
-        "options": ["Option A", "Option B", "Option C", "Option D"]
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correctAnswer": "<Correct option>"
       }
-      // Ensure to include 10 questions
-    ]
-    Please ensure the output is a valid JSON array.`;
+    ]`;
 
     const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
     const response = await model.generateContent(prompt);
 
+    // Extract text from the response
     const generatedText = response.response ? await response.response.text() : '';
     console.log("Generated Text:", generatedText);
 
-    const cleanedText = generatedText.replace(/^```json\s*|\s*```$/g, '');
+    // Sanitize the generated text by removing markdown code fences
+    const cleanedText = generatedText.replace(/```json|```/g, '').trim();
     console.log("Cleaned Text:", cleanedText);
 
-    let questions = [];
+    let questionsWithAnswers = [];
     try {
-      questions = JSON.parse(cleanedText);
-      console.log("Parsed Questions:", questions);
+      questionsWithAnswers = JSON.parse(cleanedText);
+      console.log("Parsed Questions with Answers:", questionsWithAnswers);
     } catch (jsonError) {
       console.error("Failed to parse JSON:", jsonError);
       return res.status(500).send("Invalid JSON response from the AI model.");
     }
 
-    res.render("questions", { field, questions });
+    // Store the questionsWithAnswers in memory
+    generatedQuestionsWithAnswers = questionsWithAnswers;
+
+    // Render the questions page with the generated questions
+    res.render("questions", { field, questionsWithAnswers });
   } catch (error) {
     console.error("Error generating questions:", error);
     res.status(500).send("Failed to generate questions");
@@ -69,132 +77,72 @@ app.post("/generate-questions", async (req, res) => {
 
 // Route to handle answer submission
 app.post("/submit-answers", async (req, res) => {
+  console.log("Request received at /submit-answers");
   const answers = req.body.answers || [];
-  let timings = req.body.timings || {};
-
-  if (typeof timings === 'string') {
-    try {
-      timings = JSON.parse(timings);
-    } catch (error) {
-      return res.status(400).send("Invalid timings format");
-    }
-  }
-
-  console.log("Submitted Answers:", answers);
-  console.log("Submitted Timings:", timings);
+  const timings = req.body.timings || {};
+  console.log("Answers received:", answers);
+  console.log("Timings received:", timings);
 
   try {
-    if (!Array.isArray(answers) || typeof timings !== 'object' || Array.isArray(timings)) {
-      throw new Error("Invalid data format: 'answers' is not an array or 'timings' is not an object");
-    }
-
-    if (answers.length === 0 || Object.keys(timings).length === 0) {
-      throw new Error("Answers or timings are empty or incorrectly formatted");
-    }
-
-    for (const key in timings) {
-      if (isNaN(timings[key]) || timings[key] < 0) {
-        throw new Error(`Invalid timing value for question ${key}`);
-      }
-    }
-
-    const verificationPrompt = `For each of the following questions, determine whether the provided answer is correct. 
-    Here are the questions and answers:
-    ${answers.map((answer, index) => `Question ${index + 1}: [Insert the text of question ${index + 1}] - Answer: ${answer}`).join('\n')}
-    For each question, provide a response in the format: "Question X: [Correct/Incorrect]"`;
-
-    const verificationModel = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
-    const verificationResponse = await verificationModel.generateContent(verificationPrompt);
-
-    const verificationText = verificationResponse.response ? await verificationResponse.response.text() : '';
-    console.log("Verification Text:", verificationText);
-
     let verificationResults = {};
-    const lines = verificationText.split('\n');
-    lines.forEach(line => {
-      const match = line.match(/Question (\d+): (Correct|Incorrect)/);
-      if (match) {
-        verificationResults[`q${parseInt(match[1]) - 1}`] = match[2] === 'Correct' ? 'correct' : 'incorrect';
-      }
-    });
-
-    const feedbackPrompt = `Based on the following answers and their correctness, provide detailed feedback and suggest additional tests or courses to improve. The answers are: ${JSON.stringify(answers)}. The correctness of the answers is: ${JSON.stringify(verificationResults)}. 
-    Format the response as follows:
-    - Feedback for each question.
-    - Additional Tests:
-      - Test 1
-      - Test 2
-    - Additional Courses:
-      - Course 1
-      - Course 2`;
-
-    const feedbackResponse = await verificationModel.generateContent(feedbackPrompt);
-
-    const feedbackText = feedbackResponse.response ? await feedbackResponse.response.text() : '';
-    console.log("Feedback Text:", feedbackText);
-
-    let feedbackData = {
-        feedback: [],
-        additionalTests: [],
-        additionalCourses: []
-    };
-
-    const feedbackMatch = feedbackText.match(/Feedback:\s*([\s\S]*?)(?:Additional Tests:|Additional Courses:|$)/);
-    const testsMatch = feedbackText.match(/Additional Tests:\s*([\s\S]*?)(?:Additional Courses:|$)/);
-    const coursesMatch = feedbackText.match(/Additional Courses:\s*([\s\S]*)/);
-
-    if (feedbackMatch) {
-        feedbackData.feedback = feedbackMatch[1].trim().split('\n').map(line => line.trim()).filter(line => line);
-    }
-
-    if (testsMatch) {
-        feedbackData.additionalTests = testsMatch[1].trim().split('\n').map(line => line.trim()).filter(line => line);
-    }
-
-    if (coursesMatch) {
-        feedbackData.additionalCourses = coursesMatch[1].trim().split('\n').map(line => line.trim()).filter(line => line);
-    }
-
-    const timeLabels = [];
-    const timeData = [];
-    const accuracyLabels = ['Correct', 'Incorrect'];
     let correctCount = 0;
     let incorrectCount = 0;
 
-    Object.keys(timings).forEach((questionId, index) => {
-        const timeSpent = timings[questionId];
-        timeLabels.push(`Question ${index + 1}`);
-        timeData.push(timeSpent);
+    // Compare the user's answers with the correct answers
+    generatedQuestionsWithAnswers.forEach((qna, index) => {
+      const userAnswer = answers[index];
+      const correctAnswer = qna.correctAnswer;
 
-        if (verificationResults[questionId] === 'correct') {
-            correctCount++;
-        } else {
-            incorrectCount++;
-        }
+      if (userAnswer === correctAnswer) {
+        verificationResults[`q${index}`] = 'correct';
+        correctCount++;
+      } else {
+        verificationResults[`q${index}`] = 'incorrect';
+        incorrectCount++;
+      }
     });
 
-    const accuracyData = [correctCount, incorrectCount];
+    const timeLabels = Object.keys(timings).map((key, index) => `Question ${index + 1}`);
+    const timeData = Object.values(timings);
 
-    // Calculate the score
-    const passedCount = correctCount >= 7 ? 1 : 0;  // Assuming passing score is 7 or more correct answers
+    // Calculate pass/fail
+    const passedCount = correctCount >= 7 ? 1 : 0;
     const failedCount = 1 - passedCount;
 
+    // Placeholder feedback generation logic
+    const feedbackData = {
+      feedback: generatedQuestionsWithAnswers.map((qna, index) => {
+        return verificationResults[`q${index}`] === 'correct' ? `Well done on question ${index + 1}.` : `Review the topic for question ${index + 1}.`;
+      }),
+      additionalTests: ["Practice more on weak areas."],
+      additionalCourses: ["Consider taking an advanced course in the field."]
+    };
+
     res.render("result", {
-        field: req.body.field || 'N/A',
-        timeLabels: JSON.stringify(timeLabels),
-        timeData: JSON.stringify(timeData),
-        accuracyLabels: JSON.stringify(accuracyLabels),
-        accuracyData: JSON.stringify(accuracyData),
-        correctCount, 
-        incorrectCount, 
-        feedbackData,
-        passedCount,
-        failedCount
+      field: req.body.field || 'N/A',
+      timeLabels: JSON.stringify(timeLabels),
+      timeData: JSON.stringify(timeData),
+      accuracyLabels: JSON.stringify(['Correct', 'Incorrect']),
+      accuracyData: JSON.stringify([correctCount, incorrectCount]),
+      correctCount,
+      incorrectCount,
+      feedbackData,
+      passedCount,
+      failedCount
     });
+
   } catch (error) {
-    console.error("Error generating feedback:", error);
-    res.status(500).send("Failed to generate feedback");
+    console.error("Error during answer submission:", error);
+    res.status(500).send("Failed to submit answers");
   }
+});
+
+hbs.registerHelper('incrementIndex', function(index) {
+  return index + 1;
+});
+
+hbs.registerHelper('json', function(context) {
+  return JSON.stringify(context);
 });
 
 // Start the server

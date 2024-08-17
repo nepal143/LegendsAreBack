@@ -89,12 +89,13 @@
     </style>
 </head>
 <body>
-    <h1>Objective Questions for {{field}}</h1>
+    <h1>Objective Questions</h1>
     <div id="timer">Time for current question: <span id="timer-count">0:00</span></div>
-    <form id="questions-form" action="/submit-answers" method="POST">
-        {{#each questions}}
+    <form id="questions-form">
+        {{#each questionsWithAnswers}}
         <div class="question-container">
-            <p><strong>{{@index}}. {{this.question}}</strong></p>
+            <p><strong>{{incrementIndex @index}}. {{this.question}}</strong></p>
+
             {{#each this.options}}
             <div>
                 <input type="radio" id="q{{@../index}}-o{{@index}}" name="answers[{{@../index}}]" value="{{this}}" required>
@@ -109,82 +110,95 @@
             <button type="button" id="next-button">Next</button>
         </div>
         <button type="submit" id="submit-button">Submit Answers</button>
-        <input type="hidden" name="timings" id="timings-input">
+        <input type="hidden" name="timings" id="timings">
     </form>
-
     <script>
-        let currentQuestionIndex = 0;
-        let questionStartTimes = [];
-        let questionEndTimes = [];
+        let currentQuestion = 0;
         const questions = document.querySelectorAll('.question-container');
-        const timerElement = document.getElementById('timer-count');
         const prevButton = document.getElementById('prev-button');
         const nextButton = document.getElementById('next-button');
         const submitButton = document.getElementById('submit-button');
-        let questionTimer;
+        const timerElement = document.getElementById('timer-count');
+        const timings = {};
+        let timerInterval;
 
         function showQuestion(index) {
-            questions.forEach((q, i) => {
-                q.style.display = i === index ? 'block' : 'none';
+            questions.forEach((question, i) => {
+                question.style.display = i === index ? 'block' : 'none';
             });
-            prevButton.style.display = index === 0 ? 'none' : 'inline-block';
-            nextButton.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
-            submitButton.style.display = index === questions.length - 1 ? 'block' : 'none';
-            startTimer();
-        }
 
-        function startTimer() {
-            clearInterval(questionTimer);
-            const startTime = Date.now();
-            questionStartTimes[currentQuestionIndex] = startTime;
+            prevButton.style.display = index > 0 ? 'inline-block' : 'none';
+            nextButton.style.display = index < questions.length - 1 ? 'inline-block' : 'none';
+            submitButton.style.display = index === questions.length - 1 ? 'inline-block' : 'none';
 
-            questionTimer = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - startTime) / 1000);
-                const minutes = Math.floor(elapsed / 60);
-                const seconds = elapsed % 60;
-                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            clearInterval(timerInterval);
+            let seconds = 0;
+            timerInterval = setInterval(() => {
+                seconds++;
+                timerElement.textContent = `0:${seconds < 10 ? '0' + seconds : seconds}`;
             }, 1000);
         }
 
-        function getTimingsData() {
-            const timingsData = {};
-            questions.forEach((_, i) => {
-                if (questionStartTimes[i] && questionEndTimes[i]) {
-                    timingsData[`q${i}`] = Math.floor((questionEndTimes[i] - questionStartTimes[i]) / 1000);
+        nextButton.addEventListener('click', () => {
+            timings[`q${currentQuestion}`] = parseInt(timerElement.textContent.split(':')[1]);
+            currentQuestion++;
+            showQuestion(currentQuestion);
+        });
+
+        prevButton.addEventListener('click', () => {
+            timings[`q${currentQuestion}`] = parseInt(timerElement.textContent.split(':')[1]);
+            currentQuestion--;
+            showQuestion(currentQuestion);
+        });
+
+        document.getElementById('questions-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Store the timing for the last question
+            timings[`q${currentQuestion}`] = parseInt(timerElement.textContent.split(':')[1]);
+            document.getElementById('timings').value = JSON.stringify(timings);
+
+            // Collect form data
+            const formData = {};
+            new FormData(this).forEach((value, key) => {
+                if (key.includes("answers")) {
+                    const index = key.match(/\d+/)[0]; // Extract index
+                    formData.answers = formData.answers || [];
+                    formData.answers[index] = value;
+                } else {
+                    formData[key] = value;
                 }
             });
-            return timingsData;
-        }
 
-        function submitForm() {
-            document.getElementById('timings-input').value = JSON.stringify(getTimingsData());
-            document.getElementById('questions-form').submit();
-        }
+            formData.timings = timings;
 
-        function nextQuestion() {
-            clearInterval(questionTimer);
-            questionEndTimes[currentQuestionIndex] = Date.now();
-            currentQuestionIndex++;
-            if (currentQuestionIndex < questions.length) {
-                showQuestion(currentQuestionIndex);
-            }
-        }
+            // Send data as JSON
+            fetch('/submit-answers', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text(); // Use text() if server returns HTML
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            })
+            .then(html => {
+                // Handle the response (assuming HTML is returned for rendering)
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        });
 
-        function prevQuestion() {
-            clearInterval(questionTimer);
-            questionEndTimes[currentQuestionIndex] = Date.now();
-            currentQuestionIndex--;
-            if (currentQuestionIndex >= 0) {
-                showQuestion(currentQuestionIndex);
-            }
-        }
-
-        prevButton.addEventListener('click', prevQuestion);
-        nextButton.addEventListener('click', nextQuestion);
-        submitButton.addEventListener('click', submitForm);
-
-        // Initialize with the first question
-        showQuestion(currentQuestionIndex);
+        showQuestion(0);
     </script>
 </body>
 </html>

@@ -1,167 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Results</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-        h1 {
-            color: #4a90e2;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            width: 100%;
-        }
-        .section {
-            margin-bottom: 30px;
-        }
-        .section h2 {
-            color: #4a90e2;
-            margin-bottom: 15px;
-        }
-        .section p {
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        .chart-container {
-            margin: 20px 0;
-        }
-        .chart-container canvas {
-            max-width: 100%;
-            height: 400px; /* Fixed height for consistent look */
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            background-color: #4a90e2;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #357abd;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Results</title>
+  <style>
+    /* Basic styles for the result page */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      color: #4a90e2;
+    }
+    .result-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .summary {
+      margin-bottom: 20px;
+    }
+    .summary p {
+      font-size: 18px;
+      margin: 5px 0;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Test Results for {{field}}</h1>
-
-        <div class="section">
-            <h2>Overall Results</h2>
-            <p>Total Questions: {{questions.length}}</p>
-            <p>Correct Answers: {{correctCount}}</p>
-            <p>Incorrect Answers: {{incorrectCount}}</p>
-        </div>
-
-        <div class="section">
-            <h2>Timing Data</h2>
-            <div class="chart-container">
-                <canvas id="timing-chart"></canvas>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Accuracy Data</h2>
-            <div class="chart-container">
-                <canvas id="accuracy-chart"></canvas>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>Score Distribution</h2>
-            <div class="chart-container">
-                <canvas id="score-chart"></canvas>
-            </div>
-        </div>
-
-        <button onclick="window.location.href='/generate-questions'">Generate New Test</button>
+  <div class="result-container">
+    <h1>Quiz Results</h1>
+    <div class="summary">
+      <p><strong>Field:</strong> {{field}}</p>
+      <p><strong>Correct Answers:</strong> {{correctCount}}</p>
+      <p><strong>Incorrect Answers:</strong> {{incorrectCount}}</p>
+      <p><strong>Result:</strong> {{#if passedCount}}Passed{{else}}Failed{{/if}}</p>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const timingLabels = JSON.parse('{{timeLabels}}');
-        const timingData = JSON.parse('{{timeData}}');
-
-        const accuracyLabels = JSON.parse('{{accuracyLabels}}');
-        const accuracyData = JSON.parse('{{accuracyData}}');
-
-        // Timing Chart
-        const timingCtx = document.getElementById('timing-chart').getContext('2d');
-        new Chart(timingCtx, {
-            type: 'bar',
-            data: {
-                labels: timingLabels,
-                datasets: [{
-                    label: 'Time Spent (seconds)',
-                    data: timingData,
-                    backgroundColor: '#4a90e2',
-                    borderColor: '#357abd',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Accuracy Chart
-        const accuracyCtx = document.getElementById('accuracy-chart').getContext('2d');
-        new Chart(accuracyCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Correct', 'Incorrect'],
-                datasets: [{
-                    data: accuracyData,
-                    backgroundColor: ['#4a90e2', '#e94e77']
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        });
-
-        // Score Distribution Chart
-        const scoreCtx = document.getElementById('score-chart').getContext('2d');
-        new Chart(scoreCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Passed', 'Failed'],
-                datasets: [{
-                    data: [{{passedCount}}, {{failedCount}}],
-                    backgroundColor: ['#4a90e2', '#e94e77']
-                }]
-            },
-            options: {
-                responsive: true
-            }
-        });
-    </script>
+    <div class="feedback">
+      <h2>Feedback</h2>
+      <ul>
+        {{#each feedbackData.feedback}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="additional-info">
+      <h2>Additional Tests</h2>
+      <ul>
+        {{#each feedbackData.additionalTests}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+      <h2>Additional Courses</h2>
+      <ul>
+        {{#each feedbackData.additionalCourses}}
+        <li>{{this}}</li>
+        {{/each}}
+      </ul>
+    </div>
+    <div class="timing-info">
+      <h2>Time Spent on Each Question</h2>
+      <ul>
+        {{#each timeLabels}}
+        <li>{{this}}: {{lookup ../timeData @index}} seconds</li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
 </body>
 </html>
