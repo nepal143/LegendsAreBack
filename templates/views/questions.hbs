@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objective Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        h1 {
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .question-container {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Hide all questions initially */
+        }
+        #timer {
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            color: #e94e77;
+            text-align: center;
+        }
+        form {
+            width: 100%;
+            max-width: 600px;
+        }
+        .question-container p {
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .question-container label {
+            font-size: 16px;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        button {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: #4a90e2;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #357abd;
+        }
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        .navigation-buttons button {
+            flex: 1;
+            margin: 0 5px;
+        }
+        #submit-button {
+            display: block;
+            margin-top: 20px;
+        }
+        #prev-button, #next-button {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Objective Questions for {{field}}</h1>
+    <div id="timer">Time for current question: <span id="timer-count">0:00</span></div>
+    <form id="questions-form" action="/submit-answers" method="POST">
+        {{#each questions}}
+        <div class="question-container">
+            <p><strong>{{@index}}. {{this.question}}</strong></p>
+            {{#each this.options}}
+            <div>
+                <input type="radio" id="q{{@../index}}-o{{@index}}" name="answers[{{@../index}}]" value="{{this}}" required>
+                <label for="q{{@../index}}-o{{@index}}">{{this}}</label>
+            </div>
+            {{/each}}
+        </div>
+        <hr>
+        {{/each}}
+        <div class="navigation-buttons">
+            <button type="button" id="prev-button">Previous</button>
+            <button type="button" id="next-button">Next</button>
+        </div>
+        <button type="submit" id="submit-button">Submit Answers</button>
+        <input type="hidden" name="timings" id="timings-input">
+    </form>
+
+    <script>
+        let currentQuestionIndex = 0;
+        let questionStartTimes = [];
+        let questionEndTimes = [];
+        const questions = document.querySelectorAll('.question-container');
+        const timerElement = document.getElementById('timer-count');
+        const prevButton = document.getElementById('prev-button');
+        const nextButton = document.getElementById('next-button');
+        const submitButton = document.getElementById('submit-button');
+        let questionTimer;
+
+        function showQuestion(index) {
+            questions.forEach((q, i) => {
+                q.style.display = i === index ? 'block' : 'none';
+            });
+            prevButton.style.display = index === 0 ? 'none' : 'inline-block';
+            nextButton.style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+            submitButton.style.display = index === questions.length - 1 ? 'block' : 'none';
+            startTimer();
+        }
+
+        function startTimer() {
+            clearInterval(questionTimer);
+            const startTime = Date.now();
+            questionStartTimes[currentQuestionIndex] = startTime;
+
+            questionTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            }, 1000);
+        }
+
+        function getTimingsData() {
+            const timingsData = {};
+            questions.forEach((_, i) => {
+                if (questionStartTimes[i] && questionEndTimes[i]) {
+                    timingsData[`q${i}`] = Math.floor((questionEndTimes[i] - questionStartTimes[i]) / 1000);
+                }
+            });
+            return timingsData;
+        }
+
+        function submitForm() {
+            document.getElementById('timings-input').value = JSON.stringify(getTimingsData());
+            document.getElementById('questions-form').submit();
+        }
+
+        function nextQuestion() {
+            clearInterval(questionTimer);
+            questionEndTimes[currentQuestionIndex] = Date.now();
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                showQuestion(currentQuestionIndex);
+            }
+        }
+
+        function prevQuestion() {
+            clearInterval(questionTimer);
+            questionEndTimes[currentQuestionIndex] = Date.now();
+            currentQuestionIndex--;
+            if (currentQuestionIndex >= 0) {
+                showQuestion(currentQuestionIndex);
+            }
+        }
+
+        prevButton.addEventListener('click', prevQuestion);
+        nextButton.addEventListener('click', nextQuestion);
+        submitButton.addEventListener('click', submitForm);
+
+        // Initialize with the first question
+        showQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
