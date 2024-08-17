@@ -22,14 +22,6 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .question-container {
-            margin-bottom: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: none; /* Hide all questions initially */
-        }
         #timer {
             margin: 20px 0;
             font-size: 18px;
@@ -41,35 +33,37 @@
             width: 100%;
             max-width: 600px;
         }
+        .question-container {
+            margin-bottom: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none; /* Hide all questions initially */
+        }
         .question-container p {
             margin-bottom: 15px;
             font-size: 18px;
             font-weight: bold;
         }
-        .question-container label {
-            font-size: 16px;
+        .options-container {
+            display: flex;
+            flex-direction: column;
         }
-        hr {
-            border: 0;
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 20px 0;
-        }
-        button {
-            display: inline-block;
-            padding: 12px 20px;
-            margin: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
+        .option-button {
             background-color: #4a90e2;
+            color: #fff;
             border: none;
             border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
+            text-align: left;
+            font-size: 16px;
             transition: background-color 0.3s;
         }
-        button:hover {
-            background-color: #357abd;
+        .option-button.selected {
+            background-color: #35bd6e;
         }
         .navigation-buttons {
             display: flex;
@@ -82,6 +76,18 @@
         #submit-button {
             display: block;
             margin-top: 20px;
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #submit-button:hover {
+            background-color: #357abd;
         }
         #prev-button, #next-button {
             display: none;
@@ -92,18 +98,21 @@
     <h1>Objective Questions</h1>
     <div id="timer">Time for current question: <span id="timer-count">0:00</span></div>
     <form id="questions-form">
+
         {{#each questionsWithAnswers}}
-        <div class="question-container">
+        <div class="question-container" data-index="{{@index}}">
             <p><strong>{{incrementIndex @index}}. {{this.question}}</strong></p>
 
-            {{#each this.options}}
-            <div>
-                <input type="radio" id="q{{@../index}}-o{{@index}}" name="answers[{{@../index}}]" value="{{this}}" required>
-                <label for="q{{@../index}}-o{{@index}}">{{this}}</label>
+            <div class="options-container">
+                {{#each this.options}}
+                <button type="button" class="option-button" data-answer="{{this}}" data-question="{{@../index}}">
+                    {{this}}
+                </button>
+                {{/each}}
             </div>
-            {{/each}}
         </div>
-        <hr>
+        {{#unless @last}}
+        {{/unless}}
         {{/each}}
         <div class="navigation-buttons">
             <button type="button" id="prev-button">Previous</button>
@@ -111,6 +120,7 @@
         </div>
         <button type="submit" id="submit-button">Submit Answers</button>
         <input type="hidden" name="timings" id="timings">
+        <input type="hidden" name="answers" id="answers">
     </form>
     <script>
         let currentQuestion = 0;
@@ -120,6 +130,7 @@
         const submitButton = document.getElementById('submit-button');
         const timerElement = document.getElementById('timer-count');
         const timings = {};
+        const selectedAnswers = {};
         let timerInterval;
 
         function showQuestion(index) {
@@ -137,6 +148,21 @@
                 seconds++;
                 timerElement.textContent = `0:${seconds < 10 ? '0' + seconds : seconds}`;
             }, 1000);
+        }
+
+        function handleOptionClick(event) {
+            const button = event.target;
+            const questionIndex = button.dataset.question;
+            const answer = button.dataset.answer;
+
+            // Remove 'selected' class from all buttons in the current question
+            document.querySelectorAll(`.question-container[data-index="${questionIndex}"] .option-button`).forEach(btn => btn.classList.remove('selected'));
+
+            // Add 'selected' class to the clicked button
+            button.classList.add('selected');
+
+            // Update the selected answer for the current question
+            selectedAnswers[questionIndex] = answer;
         }
 
         nextButton.addEventListener('click', () => {
@@ -159,18 +185,11 @@
             document.getElementById('timings').value = JSON.stringify(timings);
 
             // Collect form data
-            const formData = {};
-            new FormData(this).forEach((value, key) => {
-                if (key.includes("answers")) {
-                    const index = key.match(/\d+/)[0]; // Extract index
-                    formData.answers = formData.answers || [];
-                    formData.answers[index] = value;
-                } else {
-                    formData[key] = value;
-                }
-            });
-
-            formData.timings = timings;
+            const formData = {
+                answers: selectedAnswers,
+                timings: timings,
+                field: '{{field}}', 
+            };
 
             // Send data as JSON
             fetch('/submit-answers', {
@@ -196,6 +215,13 @@
             .catch(error => {
                 console.error('There was a problem with the fetch operation:', error);
             });
+        });
+
+        // Add event listeners to option buttons
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('option-button')) {
+                handleOptionClick(event);
+            }
         });
 
         showQuestion(0);

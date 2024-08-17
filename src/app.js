@@ -68,7 +68,7 @@ app.post("/generate-questions", async (req, res) => {
     generatedQuestionsWithAnswers = questionsWithAnswers;
 
     // Render the questions page with the generated questions
-    res.render("questions", { field, questionsWithAnswers });
+    res.render("questions", { field, questionsWithAnswers , cleanedText });
   } catch (error) {
     console.error("Error generating questions:", error);
     res.status(500).send("Failed to generate questions");
@@ -76,10 +76,13 @@ app.post("/generate-questions", async (req, res) => {
 });
 
 // Route to handle answer submission
+// Route to handle answer submission
+// Route to handle answer submission
 app.post("/submit-answers", async (req, res) => {
   console.log("Request received at /submit-answers");
   const answers = req.body.answers || [];
   const timings = req.body.timings || {};
+  const cleanedText = req.body.cleanedtext || '';
   console.log("Answers received:", answers);
   console.log("Timings received:", timings);
 
@@ -109,6 +112,10 @@ app.post("/submit-answers", async (req, res) => {
     const passedCount = correctCount >= 7 ? 1 : 0;
     const failedCount = 1 - passedCount;
 
+    // Calculate score (percentage)
+    const totalQuestions = generatedQuestionsWithAnswers.length;
+    const score = (correctCount / totalQuestions) * 100;
+
     // Placeholder feedback generation logic
     const feedbackData = {
       feedback: generatedQuestionsWithAnswers.map((qna, index) => {
@@ -118,17 +125,28 @@ app.post("/submit-answers", async (req, res) => {
       additionalCourses: ["Consider taking an advanced course in the field."]
     };
 
+    // Send the cleanedText and answers to Gemini for career guidance
+    const geminiResponse = await genAI.getGenerativeModel({ model: "gemini-pro", generationConfig }).generateContent(`Based on the following answers and text, provide career guidance first these are the questions with their respective correct answers : \n\n${cleanedText}\n\nUser Answers These are the answers selected by the user for these questions : ${JSON.stringify(answers)} \n\n the number of correct answer in this are ${correctCount} and the number of incorrect answers are ${incorrectCount} \n\n the user took ${timeData} seconds to answer each question\n\n in the guidance just give where the user is weak if he is and what he can do to improve his skills sugest some courses or some books to read in the starting jsut give the score to the user in words like good ok bad etc`);
+
+    // Extract and clean Gemini response
+    const geminiText = geminiResponse.response ? await geminiResponse.response.text() : '';
+    const cleanedGeminiText = geminiText.replace(/```|```json/g, '').trim();
+
+    // Render the result page with the guidance from Gemini
     res.render("result", {
       field: req.body.field || 'N/A',
       timeLabels: JSON.stringify(timeLabels),
       timeData: JSON.stringify(timeData),
       accuracyLabels: JSON.stringify(['Correct', 'Incorrect']),
       accuracyData: JSON.stringify([correctCount, incorrectCount]),
+      cleanedText,
+      geminiGuidance: cleanedGeminiText,
       correctCount,
       incorrectCount,
+      score, // Pass the score to the result page
       feedbackData,
       passedCount,
-      failedCount
+      failedCount,
     });
 
   } catch (error) {
@@ -136,6 +154,8 @@ app.post("/submit-answers", async (req, res) => {
     res.status(500).send("Failed to submit answers");
   }
 });
+
+
 
 hbs.registerHelper('incrementIndex', function(index) {
   return index + 1;

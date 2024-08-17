@@ -1,76 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Results</title>
-  <style>
-    /* Basic styles for the result page */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f9;
-      color: #333;
-      padding: 20px;
-    }
-    h1 {
-      color: #4a90e2;
-    }
-    .result-container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    .summary {
-      margin-bottom: 20px;
-    }
-    .summary p {
-      font-size: 18px;
-      margin: 5px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        h1 {
+            color: #4a90e2;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .result-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .chart {
+            margin: 20px 0;
+        }
+        .btn {
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #357abd;
+        }
+        .guidance {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+    </style>
 </head>
 <body>
-  <div class="result-container">
-    <h1>Quiz Results</h1>
-    <div class="summary">
-      <p><strong>Field:</strong> {{field}}</p>
-      <p><strong>Correct Answers:</strong> {{correctCount}}</p>
-      <p><strong>Incorrect Answers:</strong> {{incorrectCount}}</p>
-      <p><strong>Result:</strong> {{#if passedCount}}Passed{{else}}Failed{{/if}}</p>
+    <h1>Results</h1>
+    <div class="result-container">
+        <h2>Summary</h2>
+        <div class="chart">
+            <!-- Insert chart code here -->
+        </div>
+        <p>Correct Answers: {{correctCount}}</p>
+        <p>Incorrect Answers: {{incorrectCount}}</p>
+
+        <div class="guidance" id="guidance">
+            <h3>Career Guidance</h3>
+            <p>{{geminiGuidance}}</p>
+        </div>
+        <button class="btn" id="get-guidance">Get AI Career Guidance</button>
     </div>
-    <div class="feedback">
-      <h2>Feedback</h2>
-      <ul>
-        {{#each feedbackData.feedback}}
-        <li>{{this}}</li>
-        {{/each}}
-      </ul>
-    </div>
-    <div class="additional-info">
-      <h2>Additional Tests</h2>
-      <ul>
-        {{#each feedbackData.additionalTests}}
-        <li>{{this}}</li>
-        {{/each}}
-      </ul>
-      <h2>Additional Courses</h2>
-      <ul>
-        {{#each feedbackData.additionalCourses}}
-        <li>{{this}}</li>
-        {{/each}}
-      </ul>
-    </div>
-    <div class="timing-info">
-      <h2>Time Spent on Each Question</h2>
-      <ul>
-        {{#each timeLabels}}
-        <li>{{this}}: {{lookup ../timeData @index}} seconds</li>
-        {{/each}}
-      </ul>
-    </div>
-  </div>
+
+    <script>
+        document.getElementById('get-guidance').addEventListener('click', () => {
+            alert('AI Career Guidance button clicked. Make a request to the Gemini API for career guidance.');
+        });
+    </script>
 </body>
 </html>
