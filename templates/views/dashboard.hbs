@@ -54,13 +54,30 @@
         <p>{{user.email}}</p>
 
         <div class="stats-charts">
+            <!-- Average Score Over Time -->
             <div class="chart-container">
                 <h3>Average Score Over Time</h3>
                 <canvas id="averageScoreChart"></canvas>
             </div>
+            <!-- Pass Rate by Field -->
             <div class="chart-container">
                 <h3>Pass Rate by Field</h3>
                 <canvas id="passRateChart"></canvas>
+            </div>
+            <!-- Score Distribution -->
+            <div class="chart-container">
+                <h3>Score Distribution</h3>
+                <canvas id="scoreDistributionChart"></canvas>
+            </div>
+            <!-- Average Response Time by Field -->
+            <div class="chart-container">
+                <h3>Average Response Time by Field</h3>
+                <canvas id="responseTimeChart"></canvas>
+            </div>
+            <!-- Question Accuracy by Field -->
+            <div class="chart-container">
+                <h3>Question Accuracy by Field</h3>
+                <canvas id="accuracyByFieldChart"></canvas>
             </div>
         </div>
     </div>
@@ -74,6 +91,9 @@
             acc[field] = acc[field] ? acc[field] + 1 : 1;
             return acc;
         }, {});
+
+        const responseTimes = {{{json (pluck user.tests 'timings')}}};
+        const correctAnswers = {{{json (pluck user.tests 'questions')}}};
 
         // Average Score Over Time
         const ctxAverageScore = document.getElementById('averageScoreChart').getContext('2d');
@@ -138,6 +158,99 @@
                         title: {
                             display: true,
                             text: 'Number of Tests'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Score Distribution
+        const scoreDistribution = testScores.reduce((acc, score) => {
+            if (score >= 90) acc['Excellent']++;
+            else if (score >= 75) acc['Good']++;
+            else if (score >= 50) acc['Average']++;
+            else acc['Poor']++;
+            return acc;
+        }, { 'Excellent': 0, 'Good': 0, 'Average': 0, 'Poor': 0 });
+
+        const ctxScoreDistribution = document.getElementById('scoreDistributionChart').getContext('2d');
+        new Chart(ctxScoreDistribution, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(scoreDistribution),
+                datasets: [{
+                    label: 'Score Distribution',
+                    data: Object.values(scoreDistribution),
+                    backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Average Response Time by Field
+        const avgResponseTimes = fields.map((field, idx) => {
+            const times = responseTimes[idx];
+            return times.reduce((a, b) => a + b, 0) / times.length;
+        });
+
+        const ctxResponseTime = document.getElementById('responseTimeChart').getContext('2d');
+        new Chart(ctxResponseTime, {
+            type: 'radar',
+            data: {
+                labels: fields,
+                datasets: [{
+                    label: 'Average Response Time (s)',
+                    data: avgResponseTimes,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Question Accuracy by Field
+        const accuracyByField = fields.map((field, idx) => {
+            const questions = correctAnswers[idx];
+            const correct = questions.filter(q => q.userAnswer === q.correctAnswer).length;
+            return correct / questions.length * 100;
+        });
+
+        const ctxAccuracyByField = document.getElementById('accuracyByFieldChart').getContext('2d');
+        new Chart(ctxAccuracyByField, {
+            type: 'bar',
+            data: {
+                labels: fields,
+                datasets: [{
+                    label: 'Accuracy (%)',
+                    data: accuracyByField,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Accuracy (%)'
                         }
                     }
                 }
