@@ -366,6 +366,9 @@ app.post("/submit-answers", ensureAuthenticated, async (req, res) => {
 hbs.registerHelper('incrementIndex', function (index) {
   return parseInt(index, 10) + 1;
 });
+app.get('/premium', (req, res) => {
+  res.render('premium');
+}); 
 // Start the server
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
