@@ -179,6 +179,78 @@ let generatedQuestionsWithAnswers = [];
 app.get("/ask" , (req, res) => {
   res.render("ask");
 }); 
+app.post('/guidance', ensureAuthenticated, async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ guidance: "User not authenticated" });
+  }
+
+  // Example of extracting user data (you should tailor this to your specific data structure)
+  const { username, tests } = user;
+
+  try {
+    // Format user data for guidance
+    const performanceSummary = {
+      totalTests: tests.length,
+      averageScore: tests.reduce((acc, test) => acc + (test.score || 0), 0) / tests.length,
+      passedTests: tests.filter(test => test.passed).length,
+      failedTests: tests.filter(test => !test.passed).length
+    };
+
+    const prompt = `
+      Based on the following user performance data, provide career guidance and suggest potential career paths:
+      User: ${username}
+      Performance Summary: ${JSON.stringify(performanceSummary)}
+
+      Provide a detailed career guidance including suggestions for improvement and possible career paths.`;
+
+    // Generate guidance using Google Generative AI
+    const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
+    const response = await model.generateContent(prompt);
+    const generatedText = response.response ? await response.response.text() : '';
+
+    // Clean up the response
+    const cleanedText = generatedText
+      .replace(/```json|```/g, '')  // Remove markdown JSON blocks
+      .replace(/\*\*|\*/g, '')  // Remove asterisks
+      .replace(/(\r\n|\n|\r)/gm, '')  // Remove line breaks
+      .replace(/",\s*}/g, '"}')  // Fix trailing commas before closing braces
+      .trim();
+
+    // Return the generated guidance
+    res.json({ guidance: cleanedText });
+  } catch (error) {
+    console.error("Error generating guidance:", error);
+    res.status(500).json({ guidance: "Failed to generate guidance" });
+  }
+});
+
+app.post("/ask", async (req, res) => {
+  const { question } = req.body;
+  try {
+    const prompt = `You are a career guidance chat bot. Answer the following question: ${question}`;
+  
+    const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
+    const response = await model.generateContent(prompt);
+    const generatedText = response.response ? await response.response.text() : '';
+
+    // Enhanced cleanup: Remove any problematic characters or symbols
+    const cleanedText = generatedText
+      .replace(/```json|```/g, '')  // Remove markdown JSON blocks
+      .replace(/\*\*|\*/g, '')  // Remove asterisks
+      .replace(/(\r\n|\n|\r)/gm, '')  // Remove line breaks
+      .replace(/",\s*}/g, '"}')  // Fix trailing commas before closing braces
+      .trim();
+    
+    res.json({ response: cleanedText });
+  } catch (error) {
+    console.error("Error generating response:", error);
+    res.status(500).json({ response: "Failed to generate response" });
+  }
+});
+
+
 // Route to render the question generation form
 app.get("/generate-questions", ensureAuthenticated, (req, res) => {
   res.render("generate-questions-form");

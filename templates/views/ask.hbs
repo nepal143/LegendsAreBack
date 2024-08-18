@@ -120,9 +120,21 @@
             from {
                 width: 0;
             }
+
             to {
                 width: 100%;
             }
+        }
+
+        button#guidanceButton {
+            background-color: #4caf50;
+            /* Different color for distinction */
+            margin-left: 10px;
+        }
+
+        button#guidanceButton:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -140,6 +152,7 @@
         <div id="command">
             <input id="questionInput" placeholder="Type your question here..." type="text" />
             <button id="askButton">Send</button>
+            <button id="guidanceButton">Take Guidance on Your Portfolio</button>
         </div>
     </footer>
 
@@ -148,6 +161,7 @@
             const chatContainer = document.querySelector("#chatContainer");
             const questionInput = document.querySelector("#questionInput");
             const askButton = document.querySelector("#askButton");
+            const guidanceButton = document.querySelector("#guidanceButton");
 
             // Function to add a message to the chat
             const addMessage = (text, isUser = true, isTyping = false) => {
@@ -195,7 +209,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ question })   
+                            body: JSON.stringify({ question })
                         });
 
                         console.log('Server response status:', response.status);
@@ -227,10 +241,45 @@
                     askButton.click();
                 }
             });
+
+            // Handle click event on the Guidance button
+            guidanceButton.addEventListener("click", async () => {
+                guidanceButton.disabled = true; // Disable button to prevent multiple clicks
+                const loadingMessage = addMessage("Fetching guidance...", false); // Add loading message
+
+                try {
+                    console.log('Requesting portfolio guidance');
+                    const response = await fetch('/guidance', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ /* User data here */ }) // Replace with actual user data
+                    });
+
+                    console.log('Server response status:', response.status);
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Received data:', data.guidance);
+                        loadingMessage.remove(); // Remove loading message
+
+                        // Add AI's response with typing effect
+                        const messageDiv = addMessage("", false, true);
+                        simulateTyping(messageDiv, data.guidance);
+                    } else {
+                        console.error('Server response not OK:', response.status);
+                        loadingMessage.innerText = "Error retrieving guidance."; // Update loading message
+                    }
+                } catch (error) {
+                    console.error('Error fetching guidance:', error);
+                    loadingMessage.innerText = "An error occurred."; // Update loading message
+                } finally {
+                    guidanceButton.disabled = false; // Re-enable button after processing
+                }
+            });
         });
     </script>
 
 </body>
 
 </html>
-    
