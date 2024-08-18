@@ -6,30 +6,62 @@
     <title>Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/path/to/your/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-top: 0;
+            color: #333;
+        }
+        .stats-charts {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .chart-container {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .chart-container h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        canvas {
+            width: 100% !important;
+            height: 400px !important;
+        }
+    </style>
 </head>
 <body>
     <div class="dashboard-container">
         <h1>Welcome, {{user.name}}!</h1>
         <p>{{user.email}}</p>
 
-        <div class="stats-cards">
-            <div class="card">
-                <h2>Total Tests Taken</h2>
-                <p>{{user.tests.length}}</p>
+        <div class="stats-charts">
+            <div class="chart-container">
+                <h3>Average Score Over Time</h3>
+                <canvas id="averageScoreChart"></canvas>
             </div>
-            <div class="card">
-                <h2>Average Score</h2>
-                <p>{{user.averageScore}}%</p>
+            <div class="chart-container">
+                <h3>Pass Rate by Field</h3>
+                <canvas id="passRateChart"></canvas>
             </div>
-            <div class="card">
-                <h2>Pass Rate</h2>
-                <p>{{user.passRate}}%</p>
-            </div>
-        </div>
-
-        <div class="performance-overview">
-            <h3>Performance Overview</h3>
-            <canvas id="performanceChart"></canvas>
         </div>
     </div>
 
@@ -37,18 +69,20 @@
         // Pass data as JSON from Handlebars
         const testDates = {{{json (pluck user.tests 'date')}}};
         const testScores = {{{json (pluck user.tests 'score')}}};
+        const fields = {{{json (pluck user.tests 'field')}}};
+        const passRates = fields.reduce((acc, field) => {
+            acc[field] = acc[field] ? acc[field] + 1 : 1;
+            return acc;
+        }, {});
 
-        // Log data for debugging
-        console.log('Test Dates:', testDates);
-        console.log('Test Scores:', testScores);
-
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(ctx, {
+        // Average Score Over Time
+        const ctxAverageScore = document.getElementById('averageScoreChart').getContext('2d');
+        new Chart(ctxAverageScore, {
             type: 'line',
             data: {
                 labels: testDates,
                 datasets: [{
-                    label: 'Score (%)',
+                    label: 'Average Score (%)',
                     data: testScores,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 2,
@@ -56,72 +90,9 @@
                 }]
             },
             options: {
+                responsive: true,
                 scales: {
                     x: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                           <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="/path/to/your/styles.css">
-</head>
-<body>
-    <div class="dashboard-container">
-        <h1>Welcome, {{user.name}}!</h1>
-        <p>{{user.email}}</p>
-
-        <div class="stats-cards">
-            <div class="card">
-                <h2>Total Tests Taken</h2>
-                <p>{{user.tests.length}}</p>
-            </div>
-            <div class="card">
-                <h2>Average Score</h2>
-                <p>{{user.averageScore}}%</p>
-            </div>
-            <div class="card">
-                <h2>Pass Rate</h2>
-                <p>{{user.passRate}}%</p>
-            </div>
-        </div>
-
-        <div class="performance-overview">
-            <h3>Performance Overview</h3>
-            <canvas id="performanceChart"></canvas>
-        </div>
-    </div>
-
-    <script>
-        // Pass data as JSON from Handlebars
-        const testDates = {{{json (pluck user.tests 'date')}}};
-        const testScores = {{{json (pluck user.tests 'score')}}};
-
-        // Log data for debugging
-        console.log('Test Dates:', testDates);
-        console.log('Test Scores:', testScores);
-
-        const ctx = document.getElementById('performanceChart').getContext('2d');
-        const performanceChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: testDates,
-                datasets: [{
-                    label: 'Score (%)',
-                    data: testScores,
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                scales: {
-                    x: {
-                        beginAtZero: true,
                         title: {
                             display: true,
                             text: 'Test Dates'
@@ -138,18 +109,35 @@
                 }
             }
         });
-    </script>
-</body> 
-</html>
- text: 'Test Dates'
+
+        // Pass Rate by Field
+        const ctxPassRate = document.getElementById('passRateChart').getContext('2d');
+        new Chart(ctxPassRate, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(passRates),
+                datasets: [{
+                    label: 'Number of Tests Passed',
+                    data: Object.values(passRates),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Field'
                         }
                     },
                     y: {
                         beginAtZero: true,
-                        max: 100,
                         title: {
                             display: true,
-                            text: 'Score (%)'
+                            text: 'Number of Tests'
                         }
                     }
                 }
