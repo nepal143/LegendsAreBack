@@ -171,15 +171,14 @@ function ensureAuthenticated(req, res, next) {
   }
   res.redirect("/login");
 }
-
-// Set up GoogleGenerativeAI
 const api_key = process.env.GOOGLE_GENERATIVE_AI_KEY;
 const genAI = new GoogleGenerativeAI(api_key);
 const generationConfig = { temperature: 0.9, topP: 1, topK: 1, maxOutputTokens: 4096 };
-
-// Temporary in-memory storage (for demonstration, use session or database in production)
 let generatedQuestionsWithAnswers = [];
 
+app.get("/ask" , (req, res) => {
+  res.render("ask");
+}); 
 // Route to render the question generation form
 app.get("/generate-questions", ensureAuthenticated, (req, res) => {
   res.render("generate-questions-form");
@@ -201,36 +200,60 @@ app.post("/generate-questions", ensureAuthenticated, async (req, res) => {
 
     const model = genAI.getGenerativeModel({ model: "gemini-pro", generationConfig });
     const response = await model.generateContent(prompt);
-
     const generatedText = response.response ? await response.response.text() : '';
-    const cleanedText = generatedText.replace(/```json|```/g, '').trim();
+
+    // Enhanced cleanup: Remove any problematic characters or symbols
+    const cleanedText = generatedText
+      .replace(/```json|```/g, '')  // Remove markdown JSON blocks
+      .replace(/\*\*|\*/g, '')  // Remove asterisks
+      .replace(/(\r\n|\n|\r)/gm, '')  // Remove line breaks
+      .replace(/",\s*}/g, '"}')  // Fix trailing commas before closing braces
+      .trim();
+
+    console.log("Cleaned Text:", cleanedText);  // Log cleaned text for debugging
 
     let questionsWithAnswers = [];
     try {
       questionsWithAnswers = JSON.parse(cleanedText);
     } catch (jsonError) {
-      console.error("Failed to parse JSON:", jsonError);
-      return res.status(500).send("Invalid JSON response from the AI model.");
+      console.error("Failed to parse JSON:", jsonError.message);
+
+      // Attempt to recover by cleaning up malformed entries
+      const cleanedEntries = cleanedText.split('},').map(entry => entry.trim() + '}');
+      questionsWithAnswers = cleanedEntries
+        .map(entry => {
+          try {
+            return JSON.parse(entry);
+          } catch {
+            return null;
+          }
+        })
+        .filter(entry => entry !== null);  // Filter out null (malformed) entries
+
+      if (questionsWithAnswers.length === 0) {
+        return res.status(500).send("Invalid JSON response from the AI model.");
+      }
     }
 
-    // Store the questionsWithAnswers in memory
-    generatedQuestionsWithAnswers = questionsWithAnswers;
-
-    // Save the generated questions under the user's test data
+    // Get the authenticated user
     const user = req.user;
-    user.tests.push({
-      field,
+
+    // Create a test entry and save it to the user's tests
+    const testEntry = {
+      field: field,
       questions: questionsWithAnswers.map(qna => ({
         question: qna.question,
         options: qna.options,
         correctAnswer: qna.correctAnswer,
         userAnswer: null // Placeholder for user answer
       })),
-      score: null, // Placeholder for score
-      passed: null, // Placeholder for pass/fail status
+      score: null,
+      passed: null,
       timings: [],
       date: new Date()
-    });
+    };
+
+    user.tests.push(testEntry);
     await user.save();
 
     // Render the questions page with the generated questions
@@ -240,50 +263,91 @@ app.post("/generate-questions", ensureAuthenticated, async (req, res) => {
     res.status(500).send("Failed to generate questions");
   }
 });
+app.get("/test-details/:id", ensureAuthenticated, async (req, res) => {
+  try {
+    const user = req.user;
+    const testId = req.params.id;
+    const test = user.tests.id(testId);
 
+    if (!test) {
+      return res.status(404).send("Test not found");
+    }
+
+    res.render("test-details", { test });
+  } catch (error) {
+    console.error("Error fetching test details:", error);
+    res.status(500).send("Error fetching test details");
+  }
+});
+
+hbs.registerHelper('pluck', function(array, key) {
+  return array.map(item => item[key]);
+});
+hbs.registerHelper('json', function(context) {
+  return JSON.stringify(context);
+});
+app.get('/dashboard', async (req, res) => {
+  try {
+      const user = await User.findById(req.user._id).populate('tests');
+      res.render('dashboard', { user });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send('Server Error');
+  }
+});
 // Route to handle answer submission
 app.post("/submit-answers", ensureAuthenticated, async (req, res) => {
-  const answers = req.body.answers || [];
-  const timings = req.body.timings || {};
-  const cleanedText = req.body.cleanedtext || '';
+  const { answers, timings, field } = req.body;
 
   try {
-    let verificationResults = {};
     let correctCount = 0;
     let incorrectCount = 0;
-
-    // Find the test data associated with the user
     const user = req.user;
     const test = user.tests[user.tests.length - 1]; // Get the most recent test
 
-    // Compare the user's answers with the correct answers
-    test.questions.forEach((qna, index) => {
+    // Compare user's answers with correct answers and calculate score
+    test.questions = test.questions.map((qna, index) => {
       const userAnswer = answers[index];
       const correctAnswer = qna.correctAnswer;
 
       if (userAnswer === correctAnswer) {
-        verificationResults[`q${index}`] = 'correct';
         correctCount++;
       } else {
-        verificationResults[`q${index}`] = 'incorrect';
         incorrectCount++;
       }
-      qna.userAnswer = userAnswer; // Save the user's answer
+
+      return {
+        ...qna,
+        userAnswer: userAnswer || null, // Ensure null is used if no answer
+      };
     });
 
-    // Update test data with results
     test.score = (correctCount / test.questions.length) * 100;
     test.passed = correctCount >= 7;
     test.timings = Object.values(timings);
-
     await user.save();
+
+    // Generate feedback data based on performance
+    const feedbackData = {
+      feedback: test.questions.map((qna, index) => {
+        return qna.userAnswer === qna.correctAnswer
+          ? `Well done on question ${index + 1}.`
+          : `Review the topic for question ${index + 1}.`;
+      }),
+      additionalTests: ["Practice more on weak areas."],
+      additionalCourses: ["Consider taking an advanced course in the field."],
+    };
 
     const timeLabels = Object.keys(timings).map((key, index) => `Question ${index + 1}`);
     const timeData = Object.values(timings);
 
-    // Render the result page with the guidance from Gemini
+    // Save the feedback in the test entry
+    test.feedbackData = feedbackData;
+    await user.save();
+
+    // Render the result page with the feedback
     res.render("result", {
-      field: req.body.field || 'N/A',
+      field: field || 'N/A',
       timeLabels: JSON.stringify(timeLabels),
       timeData: JSON.stringify(timeData),
       correctCount,
@@ -291,14 +355,7 @@ app.post("/submit-answers", ensureAuthenticated, async (req, res) => {
       passedCount: test.passed ? 1 : 0,
       failedCount: test.passed ? 0 : 1,
       score: test.score,
-      feedbackData: {
-        feedback: test.questions.map((qna, index) => {
-          return verificationResults[`q${index}`] === 'correct' ? `Well done on question ${index + 1}.` : `Review the topic for question ${index + 1}.`;
-        }),
-        additionalTests: ["Practice more on weak areas."],
-        additionalCourses: ["Consider taking an advanced course in the field."]
-      },
-      careerGuidance: '' // Placeholder for career guidance text
+      feedbackData,
     });
 
   } catch (error) {

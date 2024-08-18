@@ -30,52 +30,74 @@
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+        .feedback-section {
+            margin-top: 20px;
+        }
         .chart {
             margin: 20px 0;
-        }
-        .btn {
-            background-color: #4a90e2;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 20px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        .btn:hover {
-            background-color: #357abd;
-        }
-        .guidance {
-            margin-top: 20px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            background-color: #f9f9f9;
         }
     </style>
 </head>
 <body>
-    <h1>Results</h1>
     <div class="result-container">
-        <h2>Summary</h2>
-        <div class="chart">
-            <!-- Insert chart code here -->
-        </div>
-        <p>Correct Answers: {{correctCount}}</p>
-        <p>Incorrect Answers: {{incorrectCount}}</p>
+        <h1>Test Results</h1>
+        <p><strong>Field:</strong> {{field}}</p>
+        <p><strong>Score:</strong> {{score}}%</p>
+        <p><strong>Correct Answers:</strong> {{correctCount}}</p>
+        <p><strong>Incorrect Answers:</strong> {{incorrectCount}}</p>
+        <p><strong>Passed:</strong> {{#if passedCount}}Yes{{else}}No{{/if}}</p>
 
-        <div class="guidance" id="guidance">
-            <h3>Career Guidance</h3>
-            <p>{{geminiGuidance}}</p>
+        <div class="chart">
+            <canvas id="timeChart"></canvas>
         </div>
-        <button class="btn" id="get-guidance">Get AI Career Guidance</button>
+
+        <div class="feedback-section">
+            <h2>AI Feedback</h2>
+            <ul>
+                {{#each feedbackData.feedback}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+            <h3>Additional Tests:</h3>
+            <ul>
+                {{#each feedbackData.additionalTests}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+            <h3>Additional Courses:</h3>
+            <ul>
+                {{#each feedbackData.additionalCourses}}
+                <li>{{this}}</li>
+                {{/each}}
+            </ul>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        document.getElementById('get-guidance').addEventListener('click', () => {
-            alert('AI Career Guidance button clicked. Make a request to the Gemini API for career guidance.');
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        const timeLabels = JSON.parse('{{timeLabels}}');
+        const timeData = JSON.parse('{{timeData}}');
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: timeLabels,
+                datasets: [{
+                    label: 'Time Spent (seconds)',
+                    data: timeData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
         });
     </script>
 </body>

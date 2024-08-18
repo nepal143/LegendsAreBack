@@ -1,162 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/path/to/your/styles.css">
 </head>
-
 <body>
-    <div class="app-container">
-        <div class="app-header">
-            <div class="app-header-left">
-                <span class="app-icon"></span>
-                <p class="app-name">DASHBOARD</p>
-                <div class="search-wrapper">
-                    <input class="search-input" type="text" placeholder="Search">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
-                        stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="feather feather-search"
-                        viewBox="0 0 24 24">
-                        <defs></defs>
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="M21 21l-4.35-4.35"></path>
-                    </svg>
-                </div>
+    <div class="dashboard-container">
+        <h1>Welcome, {{user.name}}!</h1>
+        <p>{{user.email}}</p>
+
+        <div class="stats-cards">
+            <div class="card">
+                <h2>Total Tests Taken</h2>
+                <p>{{user.tests.length}}</p>
             </div>
-            <div class="app-header-right">
-                <a class="premium" href="/premium">Access Premium</a>
-                <button class="mode-switch" title="Switch Theme">
-                    <svg class="moon" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2" width="24" height="24" viewBox="0 0 24 24">
-                        <defs></defs>
-                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
-                    </svg>
-                </button>
-                <div id="app">
-                    <button id="addButton" class="add-btn" title="Add">+</button>
-                    <div class="formouter ">
-                        <div id="formContainer" class="form-container" style="display: none;">
-                            <form id="projectForm" class="form" action="/add-card" method="post">
-                                <input type="text" name="projectName" placeholder="Project Name">
-                                <input type="text" name="projectDescription" placeholder="Project Description">
-                                <button type="submit">Submit</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-                <button class="notification-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="feather feather-bell">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-                    </svg>
-                </button>
-                <button class="profile-btn">
-                    <img src="image.png" />
-                    <span>{{userName}}</span>
-                </button>
+            <div class="card">
+                <h2>Average Score</h2>
+                <p>{{user.averageScore}}%</p>
             </div>
-            <button class="messages-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                    class="feather feather-message-circle">
-                    <path
-                        d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="app-content">
-
-            <div class="projects-section">
-                <div class="projects-section-header">
-                    <p>Career Goals</p>
-                    <p class="time"></p>
-                </div>
-
-                <div class="project-boxes jsGridView">
-     
-
-
-                    {{#each projects}}
-<div class="project-box-wrapper">
-    <div class="project-box" style="background-color: #fee4cb;">
-        <div class="project-box-header">
-            <span>{{this.projectName}}</span>
-            <div class="more-wrapper">
-                <button class="project-btn-more">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round"
-                        class="feather feather-more-vertical">
-                        <circle cx="12" cy="12" r="1" />
-                        <circle cx="12" cy="5" r="1" />
-                        <circle cx="12" cy="19" r="1" />
-                    </svg>
-                </button>
+            <div class="card">
+                <h2>Pass Rate</h2>
+                <p>{{user.passRate}}%</p>
             </div>
         </div>
-        <div class="project-box-content-header">
-            <p class="box-content-header">{{this.projectName}}</p>
-            <p class="box-content-subheader">{{this.projectDescription}}</p>
-        </div>
-    </div>
-</div>
-{{/each}}
-                    <!-- Other project-box-wrapper divs... -->
-                </div>
-            </div>
+
+        <div class="performance-overview">
+            <h3>Performance Overview</h3>
+            <canvas id="performanceChart"></canvas>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            var modeSwitch = document.querySelector('.mode-switch');
-            modeSwitch.addEventListener('click', function () {
-                document.documentElement.classList.toggle('dark');
-                modeSwitch.classList.toggle('active');
-            });
+        // Pass data as JSON from Handlebars
+        const testDates = {{{json (pluck user.tests 'date')}}};
+        const testScores = {{{json (pluck user.tests 'score')}}};
 
-            var addButton = document.getElementById('addButton');
-            var formContainer = document.getElementById('formContainer');
-            var formouter = document.getElementsByClassName('formouter')[0];
+        // Log data for debugging
+        console.log('Test Dates:', testDates);
+        console.log('Test Scores:', testScores);
 
-            // Add event listener for click event
-            addButton.addEventListener('click', function () {
-                // Toggle the visibility of the form
-                if (formContainer.style.display === 'none') {
-                    formContainer.style.display = 'block';
-                    formouter.classList.add("clicked");
-                } else {
-                    formContainer.style.display = 'none';
-                    formouter.classList.remove("clicked");
-                }
-            });
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: testDates,
+                datasets: [{
+                    label: 'Score (%)',
+                    data: testScores,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                           <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/path/to/your/styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Welcome, {{user.name}}!</h1>
+        <p>{{user.email}}</p>
 
-            // Prevent the default form submission behavior
-            var projectForm = document.getElementById('projectForm');
-            projectForm.addEventListener('submit', async function (event) {
-                // Submit the form data via AJAX
-                try {
-                    const formData = new FormData(projectForm);
-                    if (response.ok) {
-                        console.log('Form submitted successfully');
-                        // Optionally, reset the form and hide it after successful submission
-                        projectForm.reset();
-                        formContainer.style.display = 'none';
-                        formouter.classList.remove("clicked");
-                    } else {
-                        console.error('Form submission failed:', response.statusText);
+        <div class="stats-cards">
+            <div class="card">
+                <h2>Total Tests Taken</h2>
+                <p>{{user.tests.length}}</p>
+            </div>
+            <div class="card">
+                <h2>Average Score</h2>
+                <p>{{user.averageScore}}%</p>
+            </div>
+            <div class="card">
+                <h2>Pass Rate</h2>
+                <p>{{user.passRate}}%</p>
+            </div>
+        </div>
+
+        <div class="performance-overview">
+            <h3>Performance Overview</h3>
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Pass data as JSON from Handlebars
+        const testDates = {{{json (pluck user.tests 'date')}}};
+        const testScores = {{{json (pluck user.tests 'score')}}};
+
+        // Log data for debugging
+        console.log('Test Dates:', testDates);
+        console.log('Test Scores:', testScores);
+
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: testDates,
+                datasets: [{
+                    label: 'Score (%)',
+                    data: testScores,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Test Dates'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Score (%)'
+                        }
                     }
-                } catch (error) {
-                    console.error('Error submitting form:', error);
                 }
-            });
+            }
+        });
+    </script>
+</body> 
+</html>
+ text: 'Test Dates'
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Score (%)'
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>
-
 </html>
